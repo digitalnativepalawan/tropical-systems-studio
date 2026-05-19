@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
+import { uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -11,6 +12,14 @@ function fileToDataUrl(file: File): Promise<string> {
     r.onerror = reject;
     r.readAsDataURL(file);
   });
+}
+
+async function uploadFile(file: File): Promise<string> {
+  const dataUrl = await fileToDataUrl(file);
+  const res = await uploadMedia({
+    data: { passkey: ADMIN_PASSKEY, fileName: file.name, dataUrl },
+  });
+  return res.url;
 }
 
 function Field({
@@ -64,7 +73,13 @@ function ImageField({
           accept="image/*"
           onChange={async (e) => {
             const f = e.target.files?.[0];
-            if (f) onChange(await fileToDataUrl(f));
+            if (!f) return;
+            try {
+              const url = await uploadFile(f);
+              onChange(url);
+            } catch (err) {
+              alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
+            }
           }}
           className="text-[10px] text-ink-dim"
         />
@@ -74,15 +89,21 @@ function ImageField({
 }
 
 export function AdminPanel({ onClose }: { onClose: () => void }) {
-  const { content, setContent, reset } = useContent();
+  const { content, save, saving, reset } = useContent();
   const [c, setC] = useState<Content>(content);
   const [tab, setTab] = useState<"header" | "hero" | "blog" | "portfolio" | "footer">("header");
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => setC(content), [content]);
 
-  const save = () => {
-    setContent(c);
-    onClose();
+  const handleSave = async () => {
+    setErr(null);
+    try {
+      await save(ADMIN_PASSKEY, c);
+      onClose();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Save failed");
+    }
   };
 
   const upd = <K extends keyof Content>(key: K, value: Content[K]) => setC({ ...c, [key]: value });
@@ -111,13 +132,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
               CANCEL
             </button>
             <button
-              onClick={save}
-              className="label px-3 py-2 bg-accent text-white border border-accent"
+              onClick={handleSave}
+              disabled={saving}
+              className="label px-3 py-2 bg-accent text-white border border-accent disabled:opacity-50"
             >
-              SAVE
+              {saving ? "SAVING..." : "SAVE"}
             </button>
           </div>
         </div>
+        {err && <div className="label text-accent mb-3">ERROR: {err}</div>}
 
         <div className="flex gap-1 mb-4 border-b border-line">
           {(["header", "hero", "blog", "portfolio", "footer"] as const).map((t) => (

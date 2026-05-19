@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import hero from "@/assets/hero.jpg";
 import b1 from "@/assets/blog-1.jpg";
 import b2 from "@/assets/blog-2.jpg";
@@ -199,19 +198,48 @@ const defaults: Content = {
 
 type Store = {
   content: Content;
+  loaded: boolean;
+  saving: boolean;
   setContent: (c: Content) => void;
   update: <K extends keyof Content>(key: K, value: Content[K]) => void;
   reset: () => void;
+  load: () => Promise<void>;
+  save: (passkey: string, c: Content) => Promise<void>;
 };
 
-export const useContent = create<Store>()(
-  persist(
-    (set) => ({
-      content: defaults,
-      setContent: (c) => set({ content: c }),
-      update: (key, value) => set((s) => ({ content: { ...s.content, [key]: value } })),
-      reset: () => set({ content: defaults }),
-    }),
-    { name: "merqato-content-v2" }
-  )
-);
+export const defaultContent = defaults;
+
+export const useContent = create<Store>()((set, get) => ({
+  content: defaults,
+  loaded: false,
+  saving: false,
+  setContent: (c) => set({ content: c }),
+  update: (key, value) => set((s) => ({ content: { ...s.content, [key]: value } })),
+  reset: () => set({ content: defaults }),
+  load: async () => {
+    if (get().loaded) return;
+    try {
+      const { loadSiteContent } = await import("@/lib/content.functions");
+      const res = await loadSiteContent();
+      if (res.json) {
+        const parsed = JSON.parse(res.json) as Content;
+        set({ content: { ...defaults, ...parsed }, loaded: true });
+      } else {
+        set({ loaded: true });
+      }
+    } catch (e) {
+      console.error("Failed to load site content", e);
+      set({ loaded: true });
+    }
+  },
+  save: async (passkey, c) => {
+    set({ saving: true });
+    try {
+      const { saveSiteContent } = await import("@/lib/content.functions");
+      await saveSiteContent({ data: { passkey, json: JSON.stringify(c) } });
+      set({ content: c });
+    } finally {
+      set({ saving: false });
+    }
+  },
+}));
