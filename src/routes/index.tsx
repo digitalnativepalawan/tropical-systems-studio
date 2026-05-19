@@ -213,60 +213,130 @@ function Blog() {
 }
 
 function Row({ item }: { item: PortfolioItem }) {
-  return (
-    <div className="grid grid-cols-12 gap-x-4 gap-y-2 items-start py-4 border-b border-line text-[11px] uppercase tracking-[0.1em]">
-      {/* Index */}
-      <div className="col-span-1 text-ink-mute pt-1">{item.index}</div>
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
 
-      {/* Thumb */}
-      <div className="col-span-2 lg:col-span-1">
-        <div className="w-full aspect-[4/3] max-w-[88px] overflow-hidden border border-line-soft">
-          <img src={item.image} alt="" className="w-full h-full object-cover" loading="lazy" />
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setLightboxOpen(false);
+        setZoomed(false);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightboxOpen]);
+
+  return (
+    <>
+      <div className="grid grid-cols-12 gap-x-4 gap-y-2 items-start py-4 border-b border-line text-[11px] uppercase tracking-[0.1em]">
+        {/* Index */}
+        <div className="col-span-1 text-ink-mute pt-1">{item.index}</div>
+
+        {/* Thumb */}
+        <div className="col-span-2 lg:col-span-1">
+          <button
+            type="button"
+            onClick={() => { setLightboxOpen(true); setZoomed(false); }}
+            className="w-full aspect-[4/3] max-w-[88px] overflow-hidden border border-line-soft p-0 bg-transparent text-left cursor-pointer hover:border-accent transition-colors"
+          >
+            <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+          </button>
+        </div>
+
+        {/* Name + category */}
+        <div className="col-span-9 lg:col-span-2">
+          <div className="text-ink">{item.name}</div>
+          <div className="text-ink-mute mt-0.5 leading-snug">{item.category}</div>
+          <div className="inline-block mt-1.5 px-1.5 py-0.5 border border-line-soft text-[9px] text-ink-dim">{item.tag}</div>
+        </div>
+
+        {/* Description — tablet+ */}
+        <div className="hidden md:block col-span-12 lg:col-span-3 md:col-start-4 lg:col-start-auto text-ink-dim normal-case tracking-normal text-[11px] leading-relaxed pt-1">
+          {item.description}
+        </div>
+
+        {/* Status */}
+        <div className="hidden md:flex col-span-3 lg:col-span-1 items-start gap-1.5 pt-1">
+          <Dot className="mt-1" />
+          <div className="whitespace-pre-line text-ink leading-tight">{item.status}</div>
+        </div>
+
+        {/* Deployed */}
+        <div className="hidden md:block col-span-3 lg:col-span-1 text-ink-dim pt-1">
+          <div>{item.deployedDate}</div>
+          <div>{item.deployedVersion}</div>
+        </div>
+
+        {/* Environment */}
+        <div className="hidden md:block col-span-3 lg:col-span-1 text-ink-dim pt-1">
+          <div>{item.environment}</div>
+          <div>{item.environmentLoc}</div>
+        </div>
+
+        {/* Role */}
+        <div className="hidden md:block col-span-3 lg:col-span-1 text-ink-dim pt-1">
+          <div>{item.role}</div>
+          <div>{item.roleType}</div>
+        </div>
+
+        {/* Link */}
+        <div className="col-span-12 md:col-span-12 lg:col-span-1 flex items-center md:justify-start lg:justify-end gap-1 pt-1 md:pt-2 lg:pt-1 md:col-start-4 lg:col-start-auto">
+          <a href={item.url} target="_blank" rel="noreferrer" className="text-accent hover:underline truncate">{item.link}</a>
+          <ArrowUpRight className="w-3 h-3 text-accent shrink-0" />
         </div>
       </div>
 
-      {/* Name + category */}
-      <div className="col-span-9 lg:col-span-2">
-        <div className="text-ink">{item.name}</div>
-        <div className="text-ink-mute mt-0.5 leading-snug">{item.category}</div>
-        <div className="inline-block mt-1.5 px-1.5 py-0.5 border border-line-soft text-[9px] text-ink-dim">{item.tag}</div>
-      </div>
-
-      {/* Description — tablet+ */}
-      <div className="hidden md:block col-span-12 lg:col-span-3 md:col-start-4 lg:col-start-auto text-ink-dim normal-case tracking-normal text-[11px] leading-relaxed pt-1">
-        {item.description}
-      </div>
-
-      {/* Status */}
-      <div className="hidden md:flex col-span-3 lg:col-span-1 items-start gap-1.5 pt-1">
-        <Dot className="mt-1" />
-        <div className="whitespace-pre-line text-ink leading-tight">{item.status}</div>
-      </div>
-
-      {/* Deployed */}
-      <div className="hidden md:block col-span-3 lg:col-span-1 text-ink-dim pt-1">
-        <div>{item.deployedDate}</div>
-        <div>{item.deployedVersion}</div>
-      </div>
-
-      {/* Environment */}
-      <div className="hidden md:block col-span-3 lg:col-span-1 text-ink-dim pt-1">
-        <div>{item.environment}</div>
-        <div>{item.environmentLoc}</div>
-      </div>
-
-      {/* Role */}
-      <div className="hidden md:block col-span-3 lg:col-span-1 text-ink-dim pt-1">
-        <div>{item.role}</div>
-        <div>{item.roleType}</div>
-      </div>
-
-      {/* Link */}
-      <div className="col-span-12 md:col-span-12 lg:col-span-1 flex items-center md:justify-start lg:justify-end gap-1 pt-1 md:pt-2 lg:pt-1 md:col-start-4 lg:col-start-auto">
-        <a href={item.url} target="_blank" rel="noreferrer" className="text-accent hover:underline truncate">{item.link}</a>
-        <ArrowUpRight className="w-3 h-3 text-accent shrink-0" />
-      </div>
-    </div>
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-[90] bg-black/90 backdrop-blur-sm flex flex-col"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setLightboxOpen(false);
+              setZoomed(false);
+            }
+          }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-line/30 shrink-0">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-ink-dim">
+              <span className="text-accent">{item.index}</span> <span className="text-ink">{item.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setZoomed(z => !z)}
+                className="label px-3 py-1.5 border border-line-soft text-ink-dim hover:border-accent hover:text-accent transition-colors"
+              >
+                {zoomed ? "ZOOM OUT" : "ZOOM IN"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLightboxOpen(false); setZoomed(false); }}
+                className="label px-3 py-1.5 border border-line-soft text-ink-dim hover:border-accent hover:text-accent transition-colors"
+              >
+                CLOSE
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto flex items-start justify-center p-4 md:p-8">
+            <img
+              src={item.image}
+              alt={item.name}
+              onClick={() => setZoomed(z => !z)}
+              className="block transition-all duration-500 ease-out"
+              style={{
+                cursor: zoomed ? "zoom-out" : "zoom-in",
+                maxWidth: zoomed ? "none" : "85vw",
+                maxHeight: zoomed ? "none" : "75vh",
+                width: "auto",
+                height: "auto",
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
