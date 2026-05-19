@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Json } from "@/integrations/supabase/types";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -10,19 +11,22 @@ export const loadSiteContent = createServerFn({ method: "GET" }).handler(async (
     .eq("id", 1)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return { content: (data?.content ?? null) as Record<string, unknown> | null };
+  return { json: data?.content ? JSON.stringify(data.content) : null };
 });
 
 export const saveSiteContent = createServerFn({ method: "POST" })
-  .inputValidator((input: { passkey: string; content: unknown }) => {
-    if (!input || typeof input.passkey !== "string") throw new Error("Invalid input");
+  .inputValidator((input: { passkey: string; json: string }) => {
+    if (!input || typeof input.passkey !== "string" || typeof input.json !== "string") {
+      throw new Error("Invalid input");
+    }
     return input;
   })
   .handler(async ({ data }) => {
     if (data.passkey !== ADMIN_PASSKEY) throw new Error("Unauthorized");
+    const parsed = JSON.parse(data.json) as Json;
     const { error } = await supabaseAdmin
       .from("site_content")
-      .upsert({ id: 1, content: data.content as object, updated_at: new Date().toISOString() });
+      .upsert({ id: 1, content: parsed, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
