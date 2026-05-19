@@ -22,6 +22,10 @@ export type BlogPost = {
   image: string;
   videoUrl?: string;
   link?: string;
+  author?: string;
+  readTime?: string;
+  excerpt?: string;
+  content?: string;
 };
 
 export type PortfolioItem = {
