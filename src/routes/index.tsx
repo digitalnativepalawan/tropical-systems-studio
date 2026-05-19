@@ -18,10 +18,13 @@ function Header() {
   const { content } = useContent();
   const h = content.header;
   return (
-    <header className="grid grid-cols-12 gap-4 px-6 lg:px-10 pt-6 pb-4 text-[10px] uppercase tracking-[0.14em]">
-      <div className="col-span-12 md:col-span-4">
+    <header className="grid grid-cols-12 gap-3 md:gap-4 px-4 md:px-6 lg:px-10 pt-5 md:pt-6 pb-4 text-[10px] uppercase tracking-[0.14em]">
+      <div className="col-span-8 md:col-span-4">
         <div className="text-ink">{h.brand}</div>
-        <div className="text-ink-mute mt-0.5">{h.tagline}</div>
+        <div className="text-ink-mute mt-0.5 text-[9px] md:text-[10px]">{h.tagline}</div>
+      </div>
+      <div className="col-span-4 md:hidden flex justify-end">
+        <MQLogo className="w-9 h-auto" />
       </div>
       <div className="col-span-6 md:col-span-3">
         <div className="text-ink">{h.centerLine1}</div>
@@ -32,7 +35,7 @@ function Header() {
         <div className="text-ink-mute mt-0.5">{h.rightLine2}</div>
       </div>
       <div className="hidden md:flex col-span-2 justify-end">
-        <MQLogo className="w-10 h-7 text-accent" />
+        <MQLogo className="w-12 h-auto" />
       </div>
     </header>
   );
