@@ -212,6 +212,6 @@ export const useContent = create<Store>()(
       update: (key, value) => set((s) => ({ content: { ...s.content, [key]: value } })),
       reset: () => set({ content: defaults }),
     }),
-    { name: "merqato-content-v1" }
+    { name: "merqato-content-v2" }
   )
 );
