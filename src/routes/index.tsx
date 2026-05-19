@@ -2,17 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight, Github, Instagram, Linkedin, Twitter, Triangle, Mail, Globe, Building2 } from "lucide-react";
 import { useContent, type BlogPost, type PortfolioItem } from "@/store/content";
 import { AdminTrigger } from "@/components/AdminPanel";
+import mqLogo from "@/assets/mq-logo.png";
 
 export const Route = createFileRoute("/")({ component: Index });
 
 function MQLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 60" className={className} fill="none" aria-hidden>
-      <path d="M2 58 L2 8 L22 8 L22 58" stroke="currentColor" strokeWidth="6" />
-      <path d="M28 58 L28 8 L48 8 L48 58" stroke="currentColor" strokeWidth="6" />
-      <path d="M54 58 L54 8 L74 8 L74 58" stroke="currentColor" strokeWidth="6" />
-    </svg>
-  );
+  return <img src={mqLogo} alt="MQ" className={className} />;
 }
 
 function Dot({ className = "" }: { className?: string }) {
