@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
+
+const ADMIN_PASSKEY = "5309";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -172,6 +175,25 @@ export function AdminTrigger() {
   const [open, setOpen] = useState(false);
   const [askKey, setAskKey] = useState(false);
   const [val, setVal] = useState("");
+  const [error, setError] = useState(false);
+
+  const unlock = () => {
+    if (val === ADMIN_PASSKEY) {
+      setOpen(true);
+      setAskKey(false);
+      setVal("");
+      setError(false);
+      return;
+    }
+    setVal("");
+    setError(true);
+  };
+
+  const closePasskey = () => {
+    setAskKey(false);
+    setVal("");
+    setError(false);
+  };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -187,31 +209,47 @@ export function AdminTrigger() {
   return (
     <>
       <button
-        aria-label="admin"
-        onClick={() => setAskKey(true)}
-        className="fixed bottom-2 right-2 w-2 h-2 opacity-0 hover:opacity-100 z-50"
-      />
+        type="button"
+        aria-label="Open admin login"
+        onClick={() => { setAskKey(true); setError(false); }}
+        className="fixed bottom-4 right-4 z-50 flex h-10 items-center gap-2 border border-line bg-surface/95 px-3 text-[10px] uppercase tracking-[0.14em] text-ink shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur hover:border-accent hover:text-accent sm:bottom-5 sm:right-5"
+      >
+        <LockKeyhole className="h-3.5 w-3.5" />
+        <span>Admin Login</span>
+      </button>
       {askKey && (
-        <div className="fixed inset-0 bg-background/90 z-[200] flex items-center justify-center">
-          <div className="corner border border-line p-6 bg-surface w-80">
+        <div className="fixed inset-0 bg-background/92 z-[200] flex items-center justify-center px-4">
+          <div className="corner border border-line p-5 sm:p-6 bg-surface w-full max-w-[340px] shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
             <div className="c1" /><div className="c2" />
-            <div className="label mb-2">/AUTH/PASSKEY</div>
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <div className="label mb-1">/ADMIN/LOGIN</div>
+                <h2 className="font-serif text-2xl leading-none text-ink">Access Passkey</h2>
+              </div>
+              <button type="button" aria-label="Close admin login" onClick={closePasskey} className="border border-line-soft p-2 text-ink-dim hover:border-accent hover:text-accent">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
             <input
               type="password"
               autoFocus
               value={val}
-              onChange={(e) => setVal(e.target.value)}
+              onChange={(e) => { setVal(e.target.value); setError(false); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  if (val === "5309") { setOpen(true); setAskKey(false); setVal(""); }
-                  else { setVal(""); }
+                  unlock();
                 }
-                if (e.key === "Escape") { setAskKey(false); setVal(""); }
+                if (e.key === "Escape") closePasskey();
               }}
-              className="w-full bg-background border border-line p-2 text-ink font-mono"
+              className={`w-full bg-background border p-3 text-ink font-mono text-lg tracking-[0.4em] outline-none focus:border-accent ${error ? "border-accent" : "border-line"}`}
               placeholder="••••"
             />
-            <div className="label-mute label mt-2">ENTER TO SUBMIT · ESC TO CANCEL</div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div className={`label ${error ? "text-accent" : "label-mute"}`}>{error ? "INVALID PASSKEY" : "PASSKEY REQUIRED"}</div>
+              <button type="button" onClick={unlock} className="label border border-accent bg-accent px-3 py-2 text-background hover:bg-accent-dim">
+                Unlock
+              </button>
+            </div>
           </div>
         </div>
       )}
