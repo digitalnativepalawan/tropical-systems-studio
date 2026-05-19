@@ -163,9 +163,13 @@ function Hero() {
   );
 }
 
-function BlogCard({ post }: { post: BlogPost }) {
+function BlogCard({ post, onOpen }: { post: BlogPost; onOpen: (p: BlogPost) => void }) {
   return (
-    <a href={post.link || "#"} className="group corner border border-line block relative">
+    <button
+      type="button"
+      onClick={() => onOpen(post)}
+      className="group corner border border-line block relative text-left w-full cursor-pointer"
+    >
       <div className="c1" /><div className="c2" />
       <div className="relative aspect-[16/10] overflow-hidden">
         {post.videoUrl && /youtube|youtu\.be/.test(post.videoUrl) ? (
@@ -190,12 +194,80 @@ function BlogCard({ post }: { post: BlogPost }) {
           <ArrowUpRight className="w-4 h-4 text-accent shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </div>
       </div>
-    </a>
+    </button>
+  );
+}
+
+function BlogReader({ post, onClose }: { post: BlogPost; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  const paragraphs = (post.content || post.excerpt || "Full story coming soon.").split(/\n+/).filter(Boolean);
+
+  return (
+    <div className="fixed inset-0 z-[120] bg-background/95 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-background/95 px-4 py-3 sm:px-6 md:px-10">
+        <div className="text-[10px] uppercase tracking-[0.14em] text-ink-dim flex items-center gap-3">
+          <span className="text-accent">/ BLOG</span>
+          <span className="hidden sm:inline">{post.category}</span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close article"
+          className="flex items-center gap-2 border border-line px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-ink hover:border-accent hover:text-accent"
+        >
+          <X className="h-3.5 w-3.5" /> Close
+        </button>
+      </div>
+
+      <article className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+        <div className="text-[10px] uppercase tracking-[0.14em] text-ink-dim flex flex-wrap gap-x-4 gap-y-1 mb-4">
+          <span className="text-accent">{post.category}</span>
+          <span>{post.date}</span>
+          {post.author && <span>{post.author}</span>}
+          {post.readTime && <span>{post.readTime}</span>}
+        </div>
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-ink leading-[1.05] whitespace-pre-line mb-6">
+          {post.title}
+        </h1>
+        {post.excerpt && (
+          <p className="text-ink-dim text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-accent pl-4">
+            {post.excerpt}
+          </p>
+        )}
+        <div className="corner border border-line relative overflow-hidden mb-8">
+          <div className="c1" /><div className="c2" />
+          <img src={post.image} alt="" className="w-full h-auto object-cover aspect-[16/9]" />
+        </div>
+        <div className="space-y-5 text-ink text-[15px] sm:text-base leading-[1.75] font-light">
+          {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+        </div>
+        <div className="mt-12 pt-6 border-t border-line flex items-center justify-between text-[10px] uppercase tracking-[0.14em] text-ink-dim">
+          <span>END OF ARTICLE</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-2 border border-line px-3 py-1.5 text-ink hover:border-accent hover:text-accent"
+          >
+            <X className="h-3.5 w-3.5" /> Back to site
+          </button>
+        </div>
+      </article>
+    </div>
   );
 }
 
 function Blog() {
   const { content } = useContent();
+  const [active, setActive] = useState<BlogPost | null>(null);
   return (
     <section className="px-6 lg:px-10 pt-12 md:pt-16">
       <div className="flex items-end justify-between mb-4 border-t border-line pt-4">
@@ -203,11 +275,12 @@ function Blog() {
           <div className="label">/ BLOG</div>
           <h2 className="font-serif text-2xl md:text-3xl text-ink mt-1">{content.blogTitle}</h2>
         </div>
-        <a href="#" className="label flex items-center gap-1 hover:text-accent">{content.blogCta} <ArrowUpRight className="w-3 h-3 text-accent" /></a>
+        <button type="button" onClick={() => setActive(content.blog[0] ?? null)} className="label flex items-center gap-1 hover:text-accent">{content.blogCta} <ArrowUpRight className="w-3 h-3 text-accent" /></button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {content.blog.map((p) => <BlogCard key={p.id} post={p} />)}
+        {content.blog.map((p) => <BlogCard key={p.id} post={p} onOpen={setActive} />)}
       </div>
+      {active && <BlogReader post={active} onClose={() => setActive(null)} />}
     </section>
   );
 }
