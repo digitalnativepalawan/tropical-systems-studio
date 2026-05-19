@@ -96,9 +96,14 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
 
   useEffect(() => setC(content), [content]);
 
-  const save = () => {
-    setContent(c);
-    onClose();
+  const handleSave = async () => {
+    setErr(null);
+    try {
+      await save(ADMIN_PASSKEY, c);
+      onClose();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Save failed");
+    }
   };
 
   const upd = <K extends keyof Content>(key: K, value: Content[K]) => setC({ ...c, [key]: value });
