@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { ArrowUpRight, Github, Instagram, Linkedin, Twitter, Triangle, Mail, Globe, Building2 } from "lucide-react";
 import { useContent, type BlogPost, type PortfolioItem } from "@/store/content";
 import { AdminTrigger } from "@/components/AdminPanel";
