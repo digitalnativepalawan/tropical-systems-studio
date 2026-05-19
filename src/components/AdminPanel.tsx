@@ -132,13 +132,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
               CANCEL
             </button>
             <button
-              onClick={save}
-              className="label px-3 py-2 bg-accent text-white border border-accent"
+              onClick={handleSave}
+              disabled={saving}
+              className="label px-3 py-2 bg-accent text-white border border-accent disabled:opacity-50"
             >
-              SAVE
+              {saving ? "SAVING..." : "SAVE"}
             </button>
           </div>
         </div>
+        {err && <div className="label text-accent mb-3">ERROR: {err}</div>}
 
         <div className="flex gap-1 mb-4 border-b border-line">
           {(["header", "hero", "blog", "portfolio", "footer"] as const).map((t) => (
