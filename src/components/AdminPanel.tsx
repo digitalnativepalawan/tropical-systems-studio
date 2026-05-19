@@ -1,0 +1,221 @@
+import { useEffect, useState } from "react";
+import { useContent, type Content } from "@/store/content";
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function Field({ label, value, onChange, area }: { label: string; value: string; onChange: (v: string) => void; area?: boolean }) {
+  return (
+    <label className="block">
+      <span className="label block mb-1">{label}</span>
+      {area ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={3}
+          className="w-full bg-background border border-line p-2 text-ink font-mono text-[11px] focus:border-accent outline-none"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-background border border-line p-2 text-ink font-mono text-[11px] focus:border-accent outline-none"
+        />
+      )}
+    </label>
+  );
+}
+
+function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="block">
+      <span className="label block mb-1">{label}</span>
+      <div className="flex gap-2 items-center">
+        {value && <img src={value} alt="" className="w-12 h-12 object-cover border border-line" />}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            if (f) onChange(await fileToDataUrl(f));
+          }}
+          className="text-[10px] text-ink-dim"
+        />
+      </div>
+    </label>
+  );
+}
+
+export function AdminPanel({ onClose }: { onClose: () => void }) {
+  const { content, setContent, reset } = useContent();
+  const [c, setC] = useState<Content>(content);
+  const [tab, setTab] = useState<"header" | "hero" | "blog" | "portfolio" | "footer">("header");
+
+  useEffect(() => setC(content), [content]);
+
+  const save = () => {
+    setContent(c);
+    onClose();
+  };
+
+  const upd = <K extends keyof Content>(key: K, value: Content[K]) =>
+    setC({ ...c, [key]: value });
+
+  return (
+    <div className="fixed inset-0 bg-background/95 z-[100] overflow-auto">
+      <div className="max-w-5xl mx-auto p-6 corner border border-line my-6 bg-surface">
+        <div className="c1" /><div className="c2" />
+        <div className="flex items-center justify-between border-b border-line pb-3 mb-4">
+          <div>
+            <div className="label">/ADMIN/CMS</div>
+            <h2 className="font-serif text-2xl text-ink">Content Editor</h2>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={reset} className="label px-3 py-2 border border-line hover:border-accent">RESET</button>
+            <button onClick={onClose} className="label px-3 py-2 border border-line hover:border-accent">CANCEL</button>
+            <button onClick={save} className="label px-3 py-2 bg-accent text-white border border-accent">SAVE</button>
+          </div>
+        </div>
+
+        <div className="flex gap-1 mb-4 border-b border-line">
+          {(["header","hero","blog","portfolio","footer"] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} className={`label px-3 py-2 ${tab===t?"text-accent border-b border-accent -mb-px":"text-ink-dim"}`}>{t}</button>
+          ))}
+        </div>
+
+        {tab === "header" && (
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(c.header).map(([k, v]) => (
+              <Field key={k} label={k} value={v} onChange={(nv) => upd("header", { ...c.header, [k]: nv })} />
+            ))}
+          </div>
+        )}
+
+        {tab === "hero" && (
+          <div className="grid grid-cols-2 gap-3">
+            <ImageField label="background image" value={c.hero.image} onChange={(nv) => upd("hero", { ...c.hero, image: nv })} />
+            {Object.entries(c.hero).filter(([k]) => k !== "image").map(([k, v]) => (
+              <Field key={k} label={k} value={v as string} onChange={(nv) => upd("hero", { ...c.hero, [k]: nv })} />
+            ))}
+          </div>
+        )}
+
+        {tab === "blog" && (
+          <div className="space-y-4">
+            <Field label="section title" value={c.blogTitle} onChange={(v) => upd("blogTitle", v)} />
+            <Field label="CTA label" value={c.blogCta} onChange={(v) => upd("blogCta", v)} />
+            {c.blog.map((post, i) => (
+              <div key={post.id} className="border border-line p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="label">POST {i + 1}</span>
+                  <button onClick={() => upd("blog", c.blog.filter((_, j) => j !== i))} className="label text-accent">DELETE</button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <ImageField label="image" value={post.image} onChange={(nv) => upd("blog", c.blog.map((p, j) => j === i ? { ...p, image: nv } : p))} />
+                  <Field label="video URL (mp4 or YouTube)" value={post.videoUrl || ""} onChange={(nv) => upd("blog", c.blog.map((p, j) => j === i ? { ...p, videoUrl: nv } : p))} />
+                  {(["category","meta1","meta2","meta3","date","link"] as const).map(k => (
+                    <Field key={k} label={k} value={(post[k] as string) || ""} onChange={(nv) => upd("blog", c.blog.map((p, j) => j === i ? { ...p, [k]: nv } : p))} />
+                  ))}
+                  <div className="col-span-2"><Field area label="title" value={post.title} onChange={(nv) => upd("blog", c.blog.map((p, j) => j === i ? { ...p, title: nv } : p))} /></div>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => upd("blog", [...c.blog, { id: String(Date.now()), category: "NEW", meta1: "", meta2: "", meta3: "", date: "", title: "New post", image: "" }])} className="label px-3 py-2 border border-line hover:border-accent">+ ADD POST</button>
+          </div>
+        )}
+
+        {tab === "portfolio" && (
+          <div className="space-y-4">
+            <Field label="section title" value={c.portfolioTitle} onChange={(v) => upd("portfolioTitle", v)} />
+            {c.portfolio.map((item, i) => (
+              <div key={item.id} className="border border-line p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="label">{item.index} — {item.name}</span>
+                  <div className="flex gap-2">
+                    <button disabled={i===0} onClick={() => { const arr=[...c.portfolio]; [arr[i-1],arr[i]]=[arr[i],arr[i-1]]; upd("portfolio",arr); }} className="label disabled:opacity-30">↑</button>
+                    <button disabled={i===c.portfolio.length-1} onClick={() => { const arr=[...c.portfolio]; [arr[i+1],arr[i]]=[arr[i],arr[i+1]]; upd("portfolio",arr); }} className="label disabled:opacity-30">↓</button>
+                    <button onClick={() => upd("portfolio", c.portfolio.filter((_, j) => j !== i))} className="label text-accent">DELETE</button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <ImageField label="image" value={item.image} onChange={(nv) => upd("portfolio", c.portfolio.map((p, j) => j === i ? { ...p, image: nv } : p))} />
+                  {(["index","name","category","tag","status","deployedDate","deployedVersion","environment","environmentLoc","role","roleType","link","url"] as const).map(k => (
+                    <Field key={k} label={k} value={item[k] as string} onChange={(nv) => upd("portfolio", c.portfolio.map((p, j) => j === i ? { ...p, [k]: nv } : p))} />
+                  ))}
+                  <div className="col-span-2"><Field area label="description" value={item.description} onChange={(nv) => upd("portfolio", c.portfolio.map((p, j) => j === i ? { ...p, description: nv } : p))} /></div>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => upd("portfolio", [...c.portfolio, { id: String(Date.now()), index: String(c.portfolio.length+1).padStart(2,"0"), image: "", name: "NEW.APP", category: "CATEGORY", tag: "TAG", description: "", status: "LIVE\nACTIVE", deployedDate: "", deployedVersion: "", environment: "CLOUD", environmentLoc: "", role: "FOUNDER", roleType: "FULLSTACK", link: "", url: "" }])} className="label px-3 py-2 border border-line hover:border-accent">+ ADD APP</button>
+          </div>
+        )}
+
+        {tab === "footer" && (
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(c.footer).map(([k, v]) => (
+              <Field key={k} label={k} value={v} onChange={(nv) => upd("footer", { ...c.footer, [k]: nv })} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function AdminTrigger() {
+  const [open, setOpen] = useState(false);
+  const [askKey, setAskKey] = useState(false);
+  const [val, setVal] = useState("");
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        setAskKey(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  return (
+    <>
+      <button
+        aria-label="admin"
+        onClick={() => setAskKey(true)}
+        className="fixed bottom-2 right-2 w-2 h-2 opacity-0 hover:opacity-100 z-50"
+      />
+      {askKey && (
+        <div className="fixed inset-0 bg-background/90 z-[200] flex items-center justify-center">
+          <div className="corner border border-line p-6 bg-surface w-80">
+            <div className="c1" /><div className="c2" />
+            <div className="label mb-2">/AUTH/PASSKEY</div>
+            <input
+              type="password"
+              autoFocus
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (val === "5309") { setOpen(true); setAskKey(false); setVal(""); }
+                  else { setVal(""); }
+                }
+                if (e.key === "Escape") { setAskKey(false); setVal(""); }
+              }}
+              className="w-full bg-background border border-line p-2 text-ink font-mono"
+              placeholder="••••"
+            />
+            <div className="label-mute label mt-2">ENTER TO SUBMIT · ESC TO CANCEL</div>
+          </div>
+        </div>
+      )}
+      {open && <AdminPanel onClose={() => setOpen(false)} />}
+    </>
+  );
+}
