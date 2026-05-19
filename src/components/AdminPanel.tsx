@@ -73,7 +73,13 @@ function ImageField({
           accept="image/*"
           onChange={async (e) => {
             const f = e.target.files?.[0];
-            if (f) onChange(await fileToDataUrl(f));
+            if (!f) return;
+            try {
+              const url = await uploadFile(f);
+              onChange(url);
+            } catch (err) {
+              alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
+            }
           }}
           className="text-[10px] text-ink-dim"
         />
@@ -83,9 +89,10 @@ function ImageField({
 }
 
 export function AdminPanel({ onClose }: { onClose: () => void }) {
-  const { content, setContent, reset } = useContent();
+  const { content, save, saving, reset } = useContent();
   const [c, setC] = useState<Content>(content);
   const [tab, setTab] = useState<"header" | "hero" | "blog" | "portfolio" | "footer">("header");
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => setC(content), [content]);
 
