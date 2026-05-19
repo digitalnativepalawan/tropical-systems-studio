@@ -114,6 +114,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const load = useContent((s) => s.load);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
     <QueryClientProvider client={queryClient}>
