@@ -10,7 +10,7 @@ export const loadSiteContent = createServerFn({ method: "GET" }).handler(async (
     .eq("id", 1)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return { content: (data?.content ?? null) as unknown };
+  return { content: (data?.content ?? null) as Record<string, unknown> | null };
 });
 
 export const saveSiteContent = createServerFn({ method: "POST" })
