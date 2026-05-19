@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
+import { uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -11,6 +12,14 @@ function fileToDataUrl(file: File): Promise<string> {
     r.onerror = reject;
     r.readAsDataURL(file);
   });
+}
+
+async function uploadFile(file: File): Promise<string> {
+  const dataUrl = await fileToDataUrl(file);
+  const res = await uploadMedia({
+    data: { passkey: ADMIN_PASSKEY, fileName: file.name, dataUrl },
+  });
+  return res.url;
 }
 
 function Field({
