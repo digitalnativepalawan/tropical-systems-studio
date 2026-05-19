@@ -209,7 +209,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       )
                     }
                   />
-                  {(["category", "meta1", "meta2", "meta3", "date", "link"] as const).map((k) => (
+                  {(["category", "meta1", "meta2", "meta3", "date", "author", "readTime", "link"] as const).map((k) => (
                     <Field
                       key={k}
                       label={k}
@@ -234,6 +234,35 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                         )
                       }
                     />
+                  </div>
+                  <div className="col-span-2">
+                    <Field
+                      area
+                      label="excerpt (short summary shown at top of article)"
+                      value={post.excerpt || ""}
+                      onChange={(nv) =>
+                        upd(
+                          "blog",
+                          c.blog.map((p, j) => (j === i ? { ...p, excerpt: nv } : p)),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block">
+                      <span className="label block mb-1">full story (blank line separates paragraphs)</span>
+                      <textarea
+                        value={post.content || ""}
+                        onChange={(e) =>
+                          upd(
+                            "blog",
+                            c.blog.map((p, j) => (j === i ? { ...p, content: e.target.value } : p)),
+                          )
+                        }
+                        rows={14}
+                        className="w-full bg-background border border-line p-2 text-ink font-mono text-[11px] focus:border-accent outline-none leading-relaxed"
+                      />
+                    </label>
                   </div>
                 </div>
               </div>
