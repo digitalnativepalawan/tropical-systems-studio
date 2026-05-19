@@ -123,7 +123,7 @@ function Hero() {
 
           {/* center title */}
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <MQLogo className="w-10 md:w-16 h-auto mb-3 md:mb-4" />
+            <MQLogo className="w-24 sm:w-32 md:w-40 lg:w-48 h-auto mb-4 md:mb-6" />
             <div className="label text-[9px] md:text-[10px] mb-2 md:mb-3">{h.overline}</div>
             <h1 className="font-serif text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl text-ink leading-[0.95]">{h.title}</h1>
             <div className="mt-4 md:mt-6 text-[9px] md:text-[10px] uppercase tracking-[0.22em] text-ink-dim">
