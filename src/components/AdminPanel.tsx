@@ -405,12 +405,18 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       ↓
                     </button>
                     <button
-                      onClick={() =>
-                        upd(
-                          "portfolio",
-                          c.portfolio.filter((_, j) => j !== i),
-                        )
-                      }
+                      onClick={async () => {
+                        if (!confirm("Delete this product and remove its image from storage?")) return;
+                        try {
+                          if (item.image) await removeFile(item.image);
+                          await commit({
+                            ...c,
+                            portfolio: c.portfolio.filter((_, j) => j !== i),
+                          });
+                        } catch {
+                          setErr("Delete failed");
+                        }
+                      }}
                       className="label text-accent"
                     >
                       DELETE
@@ -422,10 +428,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={item.image}
                     onChange={(nv) =>
-                      upd(
-                        "portfolio",
-                        c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)),
-                      )
+                      commit({
+                        ...c,
+                        portfolio: c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      })
                     }
                   />
                   {(
@@ -475,27 +481,30 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             ))}
             <button
               onClick={() =>
-                upd("portfolio", [
-                  ...c.portfolio,
-                  {
-                    id: String(Date.now()),
-                    index: String(c.portfolio.length + 1).padStart(2, "0"),
-                    image: "",
-                    name: "NEW.APP",
-                    category: "CATEGORY",
-                    tag: "TAG",
-                    description: "",
-                    status: "LIVE\nACTIVE",
-                    deployedDate: "",
-                    deployedVersion: "",
-                    environment: "CLOUD",
-                    environmentLoc: "",
-                    role: "FOUNDER",
-                    roleType: "FULLSTACK",
-                    link: "",
-                    url: "",
-                  },
-                ])
+                commit({
+                  ...c,
+                  portfolio: [
+                    ...c.portfolio,
+                    {
+                      id: String(Date.now()),
+                      index: String(c.portfolio.length + 1).padStart(2, "0"),
+                      image: "",
+                      name: "NEW.APP",
+                      category: "CATEGORY",
+                      tag: "TAG",
+                      description: "",
+                      status: "LIVE\nACTIVE",
+                      deployedDate: "",
+                      deployedVersion: "",
+                      environment: "CLOUD",
+                      environmentLoc: "",
+                      role: "FOUNDER",
+                      roleType: "FULLSTACK",
+                      link: "",
+                      url: "",
+                    },
+                  ],
+                })
               }
               className="label px-3 py-2 border border-line hover:border-accent"
             >
