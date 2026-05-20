@@ -139,8 +139,10 @@ const defaults: Content = {
       image: b1,
       author: "MERQATO TEAM",
       readTime: "6 MIN READ",
-      excerpt: "How we designed merQato.app to run resorts end-to-end — from reservations to housekeeping — without the usual SaaS bloat.",
-      content: "Hospitality software has a reputation for being clunky, expensive, and built for a world that no longer exists. When we set out to design merQato.app, we started by sitting in the lobby of a small resort in Palawan and writing down every single task the team performed in a day.\n\nWhat we found wasn't a software problem. It was a coordination problem. Front desk, housekeeping, maintenance and revenue all lived in separate spreadsheets, separate WhatsApp groups, separate heads. Information moved through the property at the speed of conversation.\n\nSo we built one operating system. Reservations, housekeeping boards, maintenance tickets, revenue dashboards and guest messaging all share the same underlying state. When a guest checks out, housekeeping knows instantly. When a room is flagged for maintenance, the booking engine stops selling it. Nothing has to be remembered. Nothing has to be re-typed.\n\nThe result is a property that runs quieter. Staff spend less time chasing information and more time with guests. Owners see real numbers, in real time, on any device.\n\nThis is what we mean by operational infrastructure: software that fades into the background and lets the work happen.",
+      excerpt:
+        "How we designed merQato.app to run resorts end-to-end — from reservations to housekeeping — without the usual SaaS bloat.",
+      content:
+        "Hospitality software has a reputation for being clunky, expensive, and built for a world that no longer exists. When we set out to design merQato.app, we started by sitting in the lobby of a small resort in Palawan and writing down every single task the team performed in a day.\n\nWhat we found wasn't a software problem. It was a coordination problem. Front desk, housekeeping, maintenance and revenue all lived in separate spreadsheets, separate WhatsApp groups, separate heads. Information moved through the property at the speed of conversation.\n\nSo we built one operating system. Reservations, housekeeping boards, maintenance tickets, revenue dashboards and guest messaging all share the same underlying state. When a guest checks out, housekeeping knows instantly. When a room is flagged for maintenance, the booking engine stops selling it. Nothing has to be remembered. Nothing has to be re-typed.\n\nThe result is a property that runs quieter. Staff spend less time chasing information and more time with guests. Owners see real numbers, in real time, on any device.\n\nThis is what we mean by operational infrastructure: software that fades into the background and lets the work happen.",
     },
     {
       id: "2",
@@ -153,8 +155,10 @@ const defaults: Content = {
       image: b2,
       author: "MERQATO TEAM",
       readTime: "5 MIN READ",
-      excerpt: "Off-the-shelf tools optimize for the average customer. We don't operate average businesses, so we don't use average software.",
-      content: "Every time we evaluated an off-the-shelf tool for one of our properties, we ran into the same wall. The tool was good at the eighty percent that every business shares, and useless at the twenty percent that actually makes our business ours.\n\nBuilding our own stack is not about ego. It's about owning the parts of the workflow that matter most. A booking engine that understands our pricing logic. A menu system that speaks the language of our kitchen. A directory that reflects the actual character of the town we live in.\n\nWe use modern building blocks — TypeScript, edge-rendered React, Postgres, Cloudflare — but the surface area is always tailored. Less is more. We ship small. We delete often. The codebase is something we read together on a Monday morning, not a black box we pay a vendor to maintain.\n\nThe tradeoff is real. Building takes time. But every tool we own is a tool that compounds, and an ecosystem that no competitor can copy by writing a check.",
+      excerpt:
+        "Off-the-shelf tools optimize for the average customer. We don't operate average businesses, so we don't use average software.",
+      content:
+        "Every time we evaluated an off-the-shelf tool for one of our properties, we ran into the same wall. The tool was good at the eighty percent that every business shares, and useless at the twenty percent that actually makes our business ours.\n\nBuilding our own stack is not about ego. It's about owning the parts of the workflow that matter most. A booking engine that understands our pricing logic. A menu system that speaks the language of our kitchen. A directory that reflects the actual character of the town we live in.\n\nWe use modern building blocks — TypeScript, edge-rendered React, Postgres, Cloudflare — but the surface area is always tailored. Less is more. We ship small. We delete often. The codebase is something we read together on a Monday morning, not a black box we pay a vendor to maintain.\n\nThe tradeoff is real. Building takes time. But every tool we own is a tool that compounds, and an ecosystem that no competitor can copy by writing a check.",
     },
     {
       id: "3",
@@ -167,8 +171,10 @@ const defaults: Content = {
       image: b3,
       author: "MERQATO TEAM",
       readTime: "4 MIN READ",
-      excerpt: "Why we chose to base a digital studio on a remote island, and what that decision has taught us about focus, pace and presence.",
-      content: "People assume we moved to Palawan to escape work. The truth is closer to the opposite. We moved here because the noise of the city was making it impossible to do work we were proud of.\n\nThere is a particular kind of clarity that comes from living somewhere with limited bandwidth, limited shops and unlimited horizon. You stop optimizing for inputs and start optimizing for output. You stop reacting and start building.\n\nOur days are simple. Early mornings on the laptops while it is still cool. Long lunches. Afternoons in the water or in the workshop. Evenings reading, sketching, planning the next week. The work is deep because the surroundings invite depth.\n\nWe are not romantic about it. The internet drops, supply chains are fragile, and tropical weather has opinions. But on the balance, this place has made us better operators, better designers and better partners to the businesses we serve.\n\nThis blog is part of that practice — an open log of what we are building, what we are learning, and why we are doing it from here.",
+      excerpt:
+        "Why we chose to base a digital studio on a remote island, and what that decision has taught us about focus, pace and presence.",
+      content:
+        "People assume we moved to Palawan to escape work. The truth is closer to the opposite. We moved here because the noise of the city was making it impossible to do work we were proud of.\n\nThere is a particular kind of clarity that comes from living somewhere with limited bandwidth, limited shops and unlimited horizon. You stop optimizing for inputs and start optimizing for output. You stop reacting and start building.\n\nOur days are simple. Early mornings on the laptops while it is still cool. Long lunches. Afternoons in the water or in the workshop. Evenings reading, sketching, planning the next week. The work is deep because the surroundings invite depth.\n\nWe are not romantic about it. The internet drops, supply chains are fragile, and tropical weather has opinions. But on the balance, this place has made us better operators, better designers and better partners to the businesses we serve.\n\nThis blog is part of that practice — an open log of what we are building, what we are learning, and why we are doing it from here.",
     },
   ],
   portfolioTitle: "FEATURED WEB APPLICATIONS",
@@ -176,12 +182,120 @@ const defaults: Content = {
   portfolioSub2: "ONE ECOSYSTEM.",
   portfolioSub3: "BUILT IN PALAWAN.",
   portfolio: [
-    { id: "1", index: "01", image: p1, name: "NOMADS.ONE", category: "COMMUNITY PLATFORM", tag: "SOCIAL INFRASTRUCTURE", description: "A global community network connecting digital nomads, creators and remote professionals.", status: "LIVE\nACTIVE", deployedDate: "2026.02.10", deployedVersion: "V02.1", environment: "CLOUD", environmentLoc: "GLOBAL", role: "FOUNDER", roleType: "FULLSTACK", link: "nomads.one", url: "https://nomads.one" },
-    { id: "2", index: "02", image: p2, name: "MERQATO.APP", category: "HOSPITALITY OPERATING SYSTEM", tag: "OPERATIONAL PLATFORM", description: "All-in-one backoffice for resorts. Reservations, housekeeping, revenue, maintenance and guest services.", status: "LIVE\nACTIVE", deployedDate: "2026.03.05", deployedVersion: "V01.8", environment: "CLOUD", environmentLoc: "PALAWAN", role: "FOUNDER", roleType: "FULLSTACK", link: "merqato.app", url: "https://merqato.app" },
-    { id: "3", index: "03", image: p3, name: "SANVICENTE.PH", category: "MAPS & DIRECTORY", tag: "DISCOVERY PLATFORM", description: "Interactive map and business directory of San Vicente, Palawan. Explore. Discover. Support Local.", status: "LIVE\nACTIVE", deployedDate: "2026.01.20", deployedVersion: "V03.2", environment: "CLOUD", environmentLoc: "PALAWAN", role: "FOUNDER", roleType: "FULLSTACK", link: "sanvicente.ph", url: "https://sanvicente.ph" },
-    { id: "4", index: "04", image: p4, name: "MERQATO.SOLAR", category: "SOLAR CALCULATOR", tag: "UTILITY PLATFORM", description: "Solar savings estimator for homes and businesses in tropical regions. Calculate. Save. Go Solar.", status: "LIVE\nACTIVE", deployedDate: "2026.02.28", deployedVersion: "V01.5", environment: "CLOUD", environmentLoc: "GLOBAL", role: "FOUNDER", roleType: "FULLSTACK", link: "merqato.solar", url: "https://merqato.solar" },
-    { id: "5", index: "05", image: p5, name: "MERQATO.MENU", category: "DIGITAL MENU SYSTEM", tag: "BUSINESS TOOL", description: "Modern digital menu for restaurants and resorts. Beautiful, fast and mobile-first.", status: "LIVE\nACTIVE", deployedDate: "2026.04.02", deployedVersion: "V01.2", environment: "CLOUD", environmentLoc: "GLOBAL", role: "FOUNDER", roleType: "FULLSTACK", link: "merqato.menu", url: "https://merqato.menu" },
-    { id: "6", index: "06", image: p6, name: "MERQATO.STAY", category: "DIRECT BOOKING ENGINE", tag: "BOOKING PLATFORM", description: "Increase direct bookings with a fast, secure and commission-free booking system.", status: "LIVE\nACTIVE", deployedDate: "2026.04.12", deployedVersion: "V01.0", environment: "CLOUD", environmentLoc: "PALAWAN", role: "FOUNDER", roleType: "FULLSTACK", link: "merqato.stay", url: "https://merqato.stay" },
+    {
+      id: "1",
+      index: "01",
+      image: p1,
+      name: "NOMADS.ONE",
+      category: "COMMUNITY PLATFORM",
+      tag: "SOCIAL INFRASTRUCTURE",
+      description:
+        "A global community network connecting digital nomads, creators and remote professionals.",
+      status: "LIVE\nACTIVE",
+      deployedDate: "2026.02.10",
+      deployedVersion: "V02.1",
+      environment: "CLOUD",
+      environmentLoc: "GLOBAL",
+      role: "FOUNDER",
+      roleType: "FULLSTACK",
+      link: "nomads.one",
+      url: "https://nomads.one",
+    },
+    {
+      id: "2",
+      index: "02",
+      image: p2,
+      name: "MERQATO.APP",
+      category: "HOSPITALITY OPERATING SYSTEM",
+      tag: "OPERATIONAL PLATFORM",
+      description:
+        "All-in-one backoffice for resorts. Reservations, housekeeping, revenue, maintenance and guest services.",
+      status: "LIVE\nACTIVE",
+      deployedDate: "2026.03.05",
+      deployedVersion: "V01.8",
+      environment: "CLOUD",
+      environmentLoc: "PALAWAN",
+      role: "FOUNDER",
+      roleType: "FULLSTACK",
+      link: "merqato.app",
+      url: "https://merqato.app",
+    },
+    {
+      id: "3",
+      index: "03",
+      image: p3,
+      name: "SANVICENTE.PH",
+      category: "MAPS & DIRECTORY",
+      tag: "DISCOVERY PLATFORM",
+      description:
+        "Interactive map and business directory of San Vicente, Palawan. Explore. Discover. Support Local.",
+      status: "LIVE\nACTIVE",
+      deployedDate: "2026.01.20",
+      deployedVersion: "V03.2",
+      environment: "CLOUD",
+      environmentLoc: "PALAWAN",
+      role: "FOUNDER",
+      roleType: "FULLSTACK",
+      link: "sanvicente.ph",
+      url: "https://sanvicente.ph",
+    },
+    {
+      id: "4",
+      index: "04",
+      image: p4,
+      name: "MERQATO.SOLAR",
+      category: "SOLAR CALCULATOR",
+      tag: "UTILITY PLATFORM",
+      description:
+        "Solar savings estimator for homes and businesses in tropical regions. Calculate. Save. Go Solar.",
+      status: "LIVE\nACTIVE",
+      deployedDate: "2026.02.28",
+      deployedVersion: "V01.5",
+      environment: "CLOUD",
+      environmentLoc: "GLOBAL",
+      role: "FOUNDER",
+      roleType: "FULLSTACK",
+      link: "merqato.solar",
+      url: "https://merqato.solar",
+    },
+    {
+      id: "5",
+      index: "05",
+      image: p5,
+      name: "MERQATO.MENU",
+      category: "DIGITAL MENU SYSTEM",
+      tag: "BUSINESS TOOL",
+      description:
+        "Modern digital menu for restaurants and resorts. Beautiful, fast and mobile-first.",
+      status: "LIVE\nACTIVE",
+      deployedDate: "2026.04.02",
+      deployedVersion: "V01.2",
+      environment: "CLOUD",
+      environmentLoc: "GLOBAL",
+      role: "FOUNDER",
+      roleType: "FULLSTACK",
+      link: "merqato.menu",
+      url: "https://merqato.menu",
+    },
+    {
+      id: "6",
+      index: "06",
+      image: p6,
+      name: "MERQATO.STAY",
+      category: "DIRECT BOOKING ENGINE",
+      tag: "BOOKING PLATFORM",
+      description:
+        "Increase direct bookings with a fast, secure and commission-free booking system.",
+      status: "LIVE\nACTIVE",
+      deployedDate: "2026.04.12",
+      deployedVersion: "V01.0",
+      environment: "CLOUD",
+      environmentLoc: "PALAWAN",
+      role: "FOUNDER",
+      roleType: "FULLSTACK",
+      link: "merqato.stay",
+      url: "https://merqato.stay",
+    },
   ],
   footer: {
     brand: "MERQATO.DIGITAL",
@@ -223,7 +337,16 @@ export const useContent = create<Store>()((set, get) => ({
       const res = await loadSiteContent();
       if (res.json) {
         const parsed = JSON.parse(res.json) as Content;
-        set({ content: { ...defaults, ...parsed, header: { ...defaults.header, ...parsed.header }, hero: { ...defaults.hero, ...parsed.hero }, footer: { ...defaults.footer, ...parsed.footer } }, loaded: true });
+        set({
+          content: {
+            ...defaults,
+            ...parsed,
+            header: { ...defaults.header, ...parsed.header },
+            hero: { ...defaults.hero, ...parsed.hero },
+            footer: { ...defaults.footer, ...parsed.footer },
+          },
+          loaded: true,
+        });
       } else {
         set({ loaded: true });
       }

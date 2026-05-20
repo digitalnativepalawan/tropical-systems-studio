@@ -33,13 +33,11 @@ export const saveSiteContent = createServerFn({ method: "POST" })
   });
 
 export const uploadMedia = createServerFn({ method: "POST" })
-  .inputValidator(
-    (input: { passkey: string; fileName: string; dataUrl: string }) => {
-      if (!input || typeof input.passkey !== "string") throw new Error("Invalid input");
-      if (!input.dataUrl?.startsWith("data:")) throw new Error("Invalid file");
-      return input;
-    },
-  )
+  .inputValidator((input: { passkey: string; fileName: string; dataUrl: string }) => {
+    if (!input || typeof input.passkey !== "string") throw new Error("Invalid input");
+    if (!input.dataUrl?.startsWith("data:")) throw new Error("Invalid file");
+    return input;
+  })
   .handler(async ({ data }) => {
     if (data.passkey !== ADMIN_PASSKEY) throw new Error("Unauthorized");
     return uploadDataUrlToMedia(data.fileName, data.dataUrl);

@@ -266,7 +266,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={post.image}
                     onChange={(nv) =>
-                      commit({ ...c, blog: c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)) })
+                      commit({
+                        ...c,
+                        blog: c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      })
                     }
                   />
                   <Field
@@ -279,7 +282,18 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       )
                     }
                   />
-                  {(["category", "meta1", "meta2", "meta3", "date", "author", "readTime", "link"] as const).map((k) => (
+                  {(
+                    [
+                      "category",
+                      "meta1",
+                      "meta2",
+                      "meta3",
+                      "date",
+                      "author",
+                      "readTime",
+                      "link",
+                    ] as const
+                  ).map((k) => (
                     <Field
                       key={k}
                       label={k}
@@ -320,7 +334,9 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="col-span-2">
                     <label className="block">
-                      <span className="label block mb-1">full story (blank line separates paragraphs)</span>
+                      <span className="label block mb-1">
+                        full story (blank line separates paragraphs)
+                      </span>
                       <textarea
                         value={post.content || ""}
                         onChange={(e) =>
@@ -401,7 +417,8 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     </button>
                     <button
                       onClick={async () => {
-                        if (!confirm("Delete this product and remove its image from storage?")) return;
+                        if (!confirm("Delete this product and remove its image from storage?"))
+                          return;
                         try {
                           if (item.image) await removeFile(item.image);
                           await commit({
