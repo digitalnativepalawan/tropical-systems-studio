@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
-import { deleteMedia, uploadMedia } from "@/lib/content.functions";
+import { uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -20,11 +20,6 @@ async function uploadFile(file: File): Promise<string> {
     data: { passkey: ADMIN_PASSKEY, fileName: file.name, dataUrl },
   });
   return res.url;
-}
-
-async function removeFile(url: string): Promise<void> {
-  if (!url) return;
-  await deleteMedia({ data: { passkey: ADMIN_PASSKEY, url } });
 }
 
 function Field({
@@ -66,61 +61,41 @@ function ImageField({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void | Promise<void>;
+  onChange: (v: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
-
   return (
-    <div className="block">
+    <label className="block">
       <span className="label block mb-1">{label}</span>
-      <div className="flex flex-wrap gap-2 items-center">
-        {value && <img src={value} alt="" className="w-14 h-14 object-cover border border-line" />}
+      <div className="flex gap-2 items-center">
+        {value && <img src={value} alt="" className="w-12 h-12 object-cover border border-line" />}
         <input
           type="file"
           accept="image/*"
+          disabled={busy}
           onChange={async (e) => {
-            const f = e.target.files?.[0];
+            const input = e.currentTarget;
+            const f = input?.files?.[0];
             if (!f) return;
+            setBusy(true);
             try {
-              setBusy(true);
-              const previousUrl = value;
               const url = await uploadFile(f);
-              await onChange(url);
-              if (previousUrl) await removeFile(previousUrl);
+              onChange(url);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
             } finally {
               setBusy(false);
-              e.currentTarget.value = "";
+              // Reset so the same file can be re-selected; guard against unmount.
+              if (input && input.isConnected) {
+                try { input.value = ""; } catch { /* ignore */ }
+              }
             }
           }}
           className="text-[10px] text-ink-dim"
         />
-        {value && (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={async () => {
-              if (!confirm("Delete this image from storage and clear this reference?")) return;
-              try {
-                setBusy(true);
-                const previousUrl = value;
-                await onChange("");
-                await removeFile(previousUrl);
-              } catch (err) {
-                alert("Delete failed: " + (err instanceof Error ? err.message : "unknown"));
-              } finally {
-                setBusy(false);
-              }
-            }}
-            className="label border border-line px-2 py-1 text-accent disabled:opacity-50"
-          >
-            DELETE IMAGE
-          </button>
-        )}
         {busy && <span className="label text-ink-dim">SYNCING...</span>}
       </div>
-    </div>
+    </label>
   );
 }
 
@@ -139,17 +114,6 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
       onClose();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Save failed");
-    }
-  };
-
-  const commit = async (next: Content) => {
-    setErr(null);
-    setC(next);
-    try {
-      await save(ADMIN_PASSKEY, next);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "Save failed");
-      throw e;
     }
   };
 
@@ -219,7 +183,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             <ImageField
               label="background image"
               value={c.hero.image}
-              onChange={(nv) => commit({ ...c, hero: { ...c.hero, image: nv } })}
+              onChange={(nv) => upd("hero", { ...c.hero, image: nv })}
             />
             {Object.entries(c.hero)
               .filter(([k]) => k !== "image")
@@ -247,15 +211,12 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                 <div className="flex justify-between items-center">
                   <span className="label">POST {i + 1}</span>
                   <button
-                    onClick={async () => {
-                      if (!confirm("Delete this post and remove its image from storage?")) return;
-                      try {
-                        await commit({ ...c, blog: c.blog.filter((_, j) => j !== i) });
-                        if (post.image) await removeFile(post.image);
-                      } catch {
-                        setErr("Delete failed");
-                      }
-                    }}
+                    onClick={() =>
+                      upd(
+                        "blog",
+                        c.blog.filter((_, j) => j !== i),
+                      )
+                    }
                     className="label text-accent"
                   >
                     DELETE
@@ -266,10 +227,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={post.image}
                     onChange={(nv) =>
-                      commit({
-                        ...c,
-                        blog: c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)),
-                      })
+                      upd(
+                        "blog",
+                        c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      )
                     }
                   />
                   <Field
@@ -282,18 +243,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       )
                     }
                   />
-                  {(
-                    [
-                      "category",
-                      "meta1",
-                      "meta2",
-                      "meta3",
-                      "date",
-                      "author",
-                      "readTime",
-                      "link",
-                    ] as const
-                  ).map((k) => (
+                  {(["category", "meta1", "meta2", "meta3", "date", "author", "readTime", "link"] as const).map((k) => (
                     <Field
                       key={k}
                       label={k}
@@ -334,9 +284,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="col-span-2">
                     <label className="block">
-                      <span className="label block mb-1">
-                        full story (blank line separates paragraphs)
-                      </span>
+                      <span className="label block mb-1">full story (blank line separates paragraphs)</span>
                       <textarea
                         value={post.content || ""}
                         onChange={(e) =>
@@ -355,22 +303,19 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             ))}
             <button
               onClick={() =>
-                commit({
-                  ...c,
-                  blog: [
-                    ...c.blog,
-                    {
-                      id: String(Date.now()),
-                      category: "NEW",
-                      meta1: "",
-                      meta2: "",
-                      meta3: "",
-                      date: "",
-                      title: "New post",
-                      image: "",
-                    },
-                  ],
-                })
+                upd("blog", [
+                  ...c.blog,
+                  {
+                    id: String(Date.now()),
+                    category: "NEW",
+                    meta1: "",
+                    meta2: "",
+                    meta3: "",
+                    date: "",
+                    title: "New post",
+                    image: "",
+                  },
+                ])
               }
               className="label px-3 py-2 border border-line hover:border-accent"
             >
@@ -416,19 +361,12 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       ↓
                     </button>
                     <button
-                      onClick={async () => {
-                        if (!confirm("Delete this product and remove its image from storage?"))
-                          return;
-                        try {
-                          await commit({
-                            ...c,
-                            portfolio: c.portfolio.filter((_, j) => j !== i),
-                          });
-                          if (item.image) await removeFile(item.image);
-                        } catch {
-                          setErr("Delete failed");
-                        }
-                      }}
+                      onClick={() =>
+                        upd(
+                          "portfolio",
+                          c.portfolio.filter((_, j) => j !== i),
+                        )
+                      }
                       className="label text-accent"
                     >
                       DELETE
@@ -440,10 +378,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={item.image}
                     onChange={(nv) =>
-                      commit({
-                        ...c,
-                        portfolio: c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)),
-                      })
+                      upd(
+                        "portfolio",
+                        c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      )
                     }
                   />
                   {(
@@ -493,30 +431,27 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             ))}
             <button
               onClick={() =>
-                commit({
-                  ...c,
-                  portfolio: [
-                    ...c.portfolio,
-                    {
-                      id: String(Date.now()),
-                      index: String(c.portfolio.length + 1).padStart(2, "0"),
-                      image: "",
-                      name: "NEW.APP",
-                      category: "CATEGORY",
-                      tag: "TAG",
-                      description: "",
-                      status: "LIVE\nACTIVE",
-                      deployedDate: "",
-                      deployedVersion: "",
-                      environment: "CLOUD",
-                      environmentLoc: "",
-                      role: "FOUNDER",
-                      roleType: "FULLSTACK",
-                      link: "",
-                      url: "",
-                    },
-                  ],
-                })
+                upd("portfolio", [
+                  ...c.portfolio,
+                  {
+                    id: String(Date.now()),
+                    index: String(c.portfolio.length + 1).padStart(2, "0"),
+                    image: "",
+                    name: "NEW.APP",
+                    category: "CATEGORY",
+                    tag: "TAG",
+                    description: "",
+                    status: "LIVE\nACTIVE",
+                    deployedDate: "",
+                    deployedVersion: "",
+                    environment: "CLOUD",
+                    environmentLoc: "",
+                    role: "FOUNDER",
+                    roleType: "FULLSTACK",
+                    link: "",
+                    url: "",
+                  },
+                ])
               }
               className="label px-3 py-2 border border-line hover:border-accent"
             >

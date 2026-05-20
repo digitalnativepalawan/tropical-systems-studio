@@ -274,7 +274,11 @@ function DemoChat() {
       setLoading(true);
 
       try {
-        const res = await chatWithAgent({ data: { messages: newMessages } });
+        const apiMessages = newMessages.map((m) => ({
+          role: (m.role === "ai" ? "assistant" : m.role) as "user" | "assistant" | "system",
+          content: m.content,
+        }));
+        const res = await chatWithAgent({ data: { messages: apiMessages } });
         const reply = res.content || "Sorry, I couldn't process that.";
         setMessages((prev) => [...prev, { role: "ai", content: reply }]);
       } catch {
