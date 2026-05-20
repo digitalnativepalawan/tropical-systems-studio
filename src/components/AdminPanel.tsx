@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
-import { deleteMedia, replaceMedia, uploadMedia } from "@/lib/content.functions";
+import { deleteMedia, uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -18,14 +18,6 @@ async function uploadFile(file: File): Promise<string> {
   const dataUrl = await fileToDataUrl(file);
   const res = await uploadMedia({
     data: { passkey: ADMIN_PASSKEY, fileName: file.name, dataUrl },
-  });
-  return res.url;
-}
-
-async function replaceFile(currentUrl: string, file: File): Promise<string> {
-  const dataUrl = await fileToDataUrl(file);
-  const res = await replaceMedia({
-    data: { passkey: ADMIN_PASSKEY, currentUrl, fileName: file.name, dataUrl },
   });
   return res.url;
 }
@@ -91,8 +83,10 @@ function ImageField({
             if (!f) return;
             try {
               setBusy(true);
-              const url = value ? await replaceFile(value, f) : await uploadFile(f);
+              const previousUrl = value;
+              const url = await uploadFile(f);
               await onChange(url);
+              if (previousUrl) await removeFile(previousUrl);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
             } finally {
@@ -110,8 +104,9 @@ function ImageField({
               if (!confirm("Delete this image from storage and clear this reference?")) return;
               try {
                 setBusy(true);
-                await removeFile(value);
+                const previousUrl = value;
                 await onChange("");
+                await removeFile(previousUrl);
               } catch (err) {
                 alert("Delete failed: " + (err instanceof Error ? err.message : "unknown"));
               } finally {
