@@ -250,10 +250,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     onClick={async () => {
                       if (!confirm("Delete this post and remove its image from storage?")) return;
                       try {
-                        if (post.image) await removeFile(post.image);
                         await commit({ ...c, blog: c.blog.filter((_, j) => j !== i) });
+                        if (post.image) await removeFile(post.image);
                       } catch {
-                        // commit/removeFile already shows the error message
+                        setErr("Delete failed");
                       }
                     }}
                     className="label text-accent"
@@ -420,11 +420,11 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                         if (!confirm("Delete this product and remove its image from storage?"))
                           return;
                         try {
-                          if (item.image) await removeFile(item.image);
                           await commit({
                             ...c,
                             portfolio: c.portfolio.filter((_, j) => j !== i),
                           });
+                          if (item.image) await removeFile(item.image);
                         } catch {
                           setErr("Delete failed");
                         }
