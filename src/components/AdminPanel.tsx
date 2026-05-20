@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
-import { uploadMedia } from "@/lib/content.functions";
+import { deleteMedia, replaceMedia, uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -20,6 +20,19 @@ async function uploadFile(file: File): Promise<string> {
     data: { passkey: ADMIN_PASSKEY, fileName: file.name, dataUrl },
   });
   return res.url;
+}
+
+async function replaceFile(currentUrl: string, file: File): Promise<string> {
+  const dataUrl = await fileToDataUrl(file);
+  const res = await replaceMedia({
+    data: { passkey: ADMIN_PASSKEY, currentUrl, fileName: file.name, dataUrl },
+  });
+  return res.url;
+}
+
+async function removeFile(url: string): Promise<void> {
+  if (!url) return;
+  await deleteMedia({ data: { passkey: ADMIN_PASSKEY, url } });
 }
 
 function Field({
@@ -63,11 +76,13 @@ function ImageField({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const [busy, setBusy] = useState(false);
+
   return (
-    <label className="block">
+    <div className="block">
       <span className="label block mb-1">{label}</span>
-      <div className="flex gap-2 items-center">
-        {value && <img src={value} alt="" className="w-12 h-12 object-cover border border-line" />}
+      <div className="flex flex-wrap gap-2 items-center">
+        {value && <img src={value} alt="" className="w-14 h-14 object-cover border border-line" />}
         <input
           type="file"
           accept="image/*"
@@ -75,16 +90,42 @@ function ImageField({
             const f = e.target.files?.[0];
             if (!f) return;
             try {
-              const url = await uploadFile(f);
+              setBusy(true);
+              const url = value ? await replaceFile(value, f) : await uploadFile(f);
               onChange(url);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
+            } finally {
+              setBusy(false);
+              e.currentTarget.value = "";
             }
           }}
           className="text-[10px] text-ink-dim"
         />
+        {value && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              if (!confirm("Delete this image from storage and clear this reference?")) return;
+              try {
+                setBusy(true);
+                await removeFile(value);
+                onChange("");
+              } catch (err) {
+                alert("Delete failed: " + (err instanceof Error ? err.message : "unknown"));
+              } finally {
+                setBusy(false);
+              }
+            }}
+            className="label border border-line px-2 py-1 text-accent disabled:opacity-50"
+          >
+            DELETE IMAGE
+          </button>
+        )}
+        {busy && <span className="label text-ink-dim">SYNCING...</span>}
       </div>
-    </label>
+    </div>
   );
 }
 
