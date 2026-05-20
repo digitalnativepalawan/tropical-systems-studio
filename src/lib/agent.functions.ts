@@ -20,7 +20,7 @@ Rules:
 - Be encouraging — Palawan small business owners are your people
 - Use simple, clear English`;
 
-const OPENROUTER_MODEL = "meta-llama/llama-3.2-3b-instruct:free";
+const OPENROUTER_MODEL = "google/gemma-2-2b-it:free";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 function getOllamaUrl() {
