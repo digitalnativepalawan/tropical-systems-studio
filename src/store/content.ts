@@ -9,6 +9,7 @@ import p3 from "@/assets/p3.jpg";
 import p4 from "@/assets/p4.jpg";
 import p5 from "@/assets/p5.jpg";
 import p6 from "@/assets/p6.jpg";
+import { loadSiteContent, saveSiteContent } from "@/lib/content.functions";
 
 export type BlogPost = {
   id: string;
@@ -219,11 +220,10 @@ export const useContent = create<Store>()((set, get) => ({
   load: async () => {
     if (get().loaded) return;
     try {
-      const { loadSiteContent } = await import("@/lib/content.functions");
       const res = await loadSiteContent();
       if (res.json) {
         const parsed = JSON.parse(res.json) as Content;
-        set({ content: { ...defaults, ...parsed }, loaded: true });
+        set({ content: { ...defaults, ...parsed, header: { ...defaults.header, ...parsed.header }, hero: { ...defaults.hero, ...parsed.hero }, footer: { ...defaults.footer, ...parsed.footer } }, loaded: true });
       } else {
         set({ loaded: true });
       }
@@ -235,9 +235,8 @@ export const useContent = create<Store>()((set, get) => ({
   save: async (passkey, c) => {
     set({ saving: true });
     try {
-      const { saveSiteContent } = await import("@/lib/content.functions");
       await saveSiteContent({ data: { passkey, json: JSON.stringify(c) } });
-      set({ content: c });
+      set({ content: c, loaded: true });
     } finally {
       set({ saving: false });
     }
