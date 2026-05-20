@@ -74,7 +74,7 @@ function ImageField({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (v: string) => void | Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -92,7 +92,7 @@ function ImageField({
             try {
               setBusy(true);
               const url = value ? await replaceFile(value, f) : await uploadFile(f);
-              onChange(url);
+              await onChange(url);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
             } finally {
@@ -111,7 +111,7 @@ function ImageField({
               try {
                 setBusy(true);
                 await removeFile(value);
-                onChange("");
+                await onChange("");
               } catch (err) {
                 alert("Delete failed: " + (err instanceof Error ? err.message : "unknown"));
               } finally {
@@ -144,6 +144,17 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
       onClose();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Save failed");
+    }
+  };
+
+  const commit = async (next: Content) => {
+    setErr(null);
+    setC(next);
+    try {
+      await save(ADMIN_PASSKEY, next);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Save failed");
+      throw e;
     }
   };
 
