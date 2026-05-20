@@ -224,7 +224,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             <ImageField
               label="background image"
               value={c.hero.image}
-              onChange={(nv) => upd("hero", { ...c.hero, image: nv })}
+              onChange={(nv) => commit({ ...c, hero: { ...c.hero, image: nv } })}
             />
             {Object.entries(c.hero)
               .filter(([k]) => k !== "image")
