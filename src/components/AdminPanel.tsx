@@ -63,6 +63,7 @@ function ImageField({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const [busy, setBusy] = useState(false);
   return (
     <label className="block">
       <span className="label block mb-1">{label}</span>
@@ -71,18 +72,28 @@ function ImageField({
         <input
           type="file"
           accept="image/*"
+          disabled={busy}
           onChange={async (e) => {
-            const f = e.target.files?.[0];
+            const input = e.currentTarget;
+            const f = input?.files?.[0];
             if (!f) return;
+            setBusy(true);
             try {
               const url = await uploadFile(f);
               onChange(url);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
+            } finally {
+              setBusy(false);
+              // Reset so the same file can be re-selected; guard against unmount.
+              if (input && input.isConnected) {
+                try { input.value = ""; } catch { /* ignore */ }
+              }
             }
           }}
           className="text-[10px] text-ink-dim"
         />
+        {busy && <span className="label text-ink-dim">SYNCING...</span>}
       </div>
     </label>
   );
