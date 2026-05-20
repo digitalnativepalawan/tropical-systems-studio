@@ -252,12 +252,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                 <div className="flex justify-between items-center">
                   <span className="label">POST {i + 1}</span>
                   <button
-                    onClick={() =>
-                      upd(
-                        "blog",
-                        c.blog.filter((_, j) => j !== i),
-                      )
-                    }
+                    onClick={async () => {
+                      if (!confirm("Delete this post and remove its image from storage?")) return;
+                      try {
+                        if (post.image) await removeFile(post.image);
+                        await commit({ ...c, blog: c.blog.filter((_, j) => j !== i) });
+                      } catch {
+                        // commit/removeFile already shows the error message
+                      }
+                    }}
                     className="label text-accent"
                   >
                     DELETE
@@ -268,10 +271,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={post.image}
                     onChange={(nv) =>
-                      upd(
-                        "blog",
-                        c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)),
-                      )
+                      commit({ ...c, blog: c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)) })
                     }
                   />
                   <Field
@@ -344,19 +344,22 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             ))}
             <button
               onClick={() =>
-                upd("blog", [
-                  ...c.blog,
-                  {
-                    id: String(Date.now()),
-                    category: "NEW",
-                    meta1: "",
-                    meta2: "",
-                    meta3: "",
-                    date: "",
-                    title: "New post",
-                    image: "",
-                  },
-                ])
+                commit({
+                  ...c,
+                  blog: [
+                    ...c.blog,
+                    {
+                      id: String(Date.now()),
+                      category: "NEW",
+                      meta1: "",
+                      meta2: "",
+                      meta3: "",
+                      date: "",
+                      title: "New post",
+                      image: "",
+                    },
+                  ],
+                })
               }
               className="label px-3 py-2 border border-line hover:border-accent"
             >
