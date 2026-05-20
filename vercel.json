@@ -1,0 +1,7 @@
+{
+  "$schema": "https://tanstack.com/schemas/config/latest/start.json",
+  "framework": "tanstack-start",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/client",
+  "installCommand": "npm install"
+}
