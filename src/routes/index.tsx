@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowUpRight, Github, Instagram, Linkedin, Twitter, Triangle, Mail, Globe, Building2, X } from "lucide-react";
 import { useContent, type BlogPost, type PortfolioItem } from "@/store/content";
@@ -19,26 +19,30 @@ function Header() {
   const { content } = useContent();
   const h = content.header;
   return (
+    <>
     <header className="grid grid-cols-12 gap-3 md:gap-4 px-4 md:px-6 lg:px-10 pt-5 md:pt-6 pb-4 text-[10px] uppercase tracking-[0.14em]">
       <div className="col-span-8 md:col-span-4">
-        <div className="text-ink">{h.brand}</div>
-        <div className="text-ink-mute mt-0.5 text-[9px] md:text-[10px]">{h.tagline}</div>
+        <Link to="/" className="hover:text-accent transition-colors">
+          <div className="text-ink">{h.brand}</div>
+          <div className="text-ink-mute mt-0.5 text-[9px] md:text-[10px]">{h.tagline}</div>
+        </Link>
       </div>
       <div className="col-span-4 md:hidden flex justify-end">
         <MQLogo className="w-9 h-auto" />
       </div>
-      <div className="col-span-6 md:col-span-3">
-        <div className="text-ink">{h.centerLine1}</div>
-        <div className="text-ink-mute mt-0.5">{h.centerLine2}</div>
+      <div className="hidden md:flex col-span-6 md:col-span-4 items-start justify-center gap-6">
+        <span className="text-ink border-b border-ink">HOME</span>
+        <Link to="/agents" className="text-ink-dim hover:text-accent transition-colors">OPERATORS</Link>
       </div>
       <div className="col-span-6 md:col-span-3 md:text-right">
         <div className="text-ink flex md:justify-end items-center gap-1.5">{h.rightLine1}<Dot /></div>
         <div className="text-ink-mute mt-0.5">{h.rightLine2}</div>
       </div>
-      <div className="hidden md:flex col-span-2 justify-end">
+      <div className="hidden md:flex col-span-1 justify-end">
         <MQLogo className="w-12 h-auto" />
       </div>
     </header>
+    </>
   );
 }
 
@@ -471,6 +475,10 @@ function Footer() {
         {[Github, Triangle, Instagram, Twitter, Linkedin].map((Icon, i) => (
           <a key={i} href="#" className="hover:text-accent transition-colors"><Icon className="w-4 h-4" /></a>
         ))}
+      </div>
+      <div className="flex gap-4 mt-3 text-[10px] uppercase tracking-[0.14em]">
+        <span className="text-ink">HOME</span>
+        <Link to="/agents" className="text-ink-dim hover:text-accent transition-colors">OPERATORS</Link>
       </div>
     </footer>
   );
