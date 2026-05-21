@@ -421,7 +421,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       onClick={() => {
                         const arr = [...c.portfolio];
                         [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
-                        upd("portfolio", arr);
+                        void commit({ ...c, portfolio: arr });
                       }}
                       className="label disabled:opacity-30"
                     >
@@ -432,19 +432,17 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       onClick={() => {
                         const arr = [...c.portfolio];
                         [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]];
-                        upd("portfolio", arr);
+                        void commit({ ...c, portfolio: arr });
                       }}
                       className="label disabled:opacity-30"
                     >
                       ↓
                     </button>
                     <button
-                      onClick={() =>
-                        upd(
-                          "portfolio",
-                          c.portfolio.filter((_, j) => j !== i),
-                        )
-                      }
+                      onClick={() => {
+                        const next = { ...c, portfolio: c.portfolio.filter((_, j) => j !== i) };
+                        void commit(next, item.image);
+                      }}
                       className="label text-accent"
                     >
                       DELETE
@@ -456,9 +454,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={item.image}
                     onChange={(nv) =>
-                      upd(
-                        "portfolio",
-                        c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      commit(
+                        { ...c, portfolio: c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)) },
+                        item.image,
+                      )
+                    }
+                    onDelete={() =>
+                      commit(
+                        { ...c, portfolio: c.portfolio.map((p, j) => (j === i ? { ...p, image: "" } : p)) },
+                        item.image,
                       )
                     }
                   />
@@ -508,29 +512,33 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
               </div>
             ))}
             <button
-              onClick={() =>
-                upd("portfolio", [
-                  ...c.portfolio,
-                  {
-                    id: String(Date.now()),
-                    index: String(c.portfolio.length + 1).padStart(2, "0"),
-                    image: "",
-                    name: "NEW.APP",
-                    category: "CATEGORY",
-                    tag: "TAG",
-                    description: "",
-                    status: "LIVE\nACTIVE",
-                    deployedDate: "",
-                    deployedVersion: "",
-                    environment: "CLOUD",
-                    environmentLoc: "",
-                    role: "FOUNDER",
-                    roleType: "FULLSTACK",
-                    link: "",
-                    url: "",
-                  },
-                ])
-              }
+              onClick={() => {
+                const next = {
+                  ...c,
+                  portfolio: [
+                    ...c.portfolio,
+                    {
+                      id: String(Date.now()),
+                      index: String(c.portfolio.length + 1).padStart(2, "0"),
+                      image: "",
+                      name: "NEW.APP",
+                      category: "CATEGORY",
+                      tag: "TAG",
+                      description: "",
+                      status: "LIVE\nACTIVE",
+                      deployedDate: "",
+                      deployedVersion: "",
+                      environment: "CLOUD",
+                      environmentLoc: "",
+                      role: "FOUNDER",
+                      roleType: "FULLSTACK",
+                      link: "",
+                      url: "",
+                    },
+                  ],
+                };
+                void commit(next);
+              }}
               className="label px-3 py-2 border border-line hover:border-accent"
             >
               + ADD APP
