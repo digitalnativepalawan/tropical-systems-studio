@@ -1,8 +1,20 @@
 import "./lib/error-capture";
 
-import serverEntry from "@tanstack/react-start/server-entry";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+
+type ServerEntry = {
+  fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
+};
+
+let serverEntryPromise: Promise<ServerEntry> | undefined;
+
+async function getServerEntry(): Promise<ServerEntry> {
+  serverEntryPromise ??= import("@tanstack/react-start/server-entry").then(
+    (module) => (module.default ?? module) as ServerEntry,
+  );
+  return serverEntryPromise;
+}
 
 function brandedErrorResponse(): Response {
   return new Response(renderErrorPage(), {
@@ -12,10 +24,10 @@ function brandedErrorResponse(): Response {
 }
 
 export default {
-  async fetch(request: Request) {
+  async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const response = await (serverEntry as { fetch: (r: Request) => Promise<Response> | Response }).fetch(request);
-      return response;
+      const handler = await getServerEntry();
+      return await handler.fetch(request, env, ctx);
     } catch (error) {
       console.error(consumeLastCapturedError() ?? error);
       return brandedErrorResponse();
