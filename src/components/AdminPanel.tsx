@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
-import { useContent, type Content } from "@/store/content";
-import { uploadMedia } from "@/lib/content.functions";
+import { defaultContent, useContent, type Content } from "@/store/content";
+import { deleteMedia, uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -58,10 +58,12 @@ function ImageField({
   label,
   value,
   onChange,
+  onDelete,
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (v: string) => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
   return (
@@ -80,7 +82,7 @@ function ImageField({
             setBusy(true);
             try {
               const url = await uploadFile(f);
-              onChange(url);
+              await onChange(url);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
             } finally {
@@ -93,6 +95,26 @@ function ImageField({
           }}
           className="text-[10px] text-ink-dim"
         />
+        {value && onDelete && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              if (!window.confirm("Delete this image from storage and remove it from the site?")) return;
+              setBusy(true);
+              try {
+                await onDelete();
+              } catch (err) {
+                alert("Delete failed: " + (err instanceof Error ? err.message : "unknown"));
+              } finally {
+                setBusy(false);
+              }
+            }}
+            className="label border border-line px-2 py-1 text-accent hover:border-accent disabled:opacity-50"
+          >
+            DELETE IMAGE
+          </button>
+        )}
         {busy && <span className="label text-ink-dim">SYNCING...</span>}
       </div>
     </label>
@@ -104,13 +126,39 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   const [c, setC] = useState<Content>(content);
   const [tab, setTab] = useState<"header" | "hero" | "blog" | "portfolio" | "footer">("header");
   const [err, setErr] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const lastSavedJson = useRef(JSON.stringify(content));
 
-  useEffect(() => setC(content), [content]);
+  useEffect(() => {
+    const incomingJson = JSON.stringify(content);
+    setC((current) => (JSON.stringify(current) === lastSavedJson.current ? content : current));
+    lastSavedJson.current = incomingJson;
+  }, [content]);
+
+  useEffect(() => {
+    const json = JSON.stringify(c);
+    if (json === lastSavedJson.current) return;
+    const timer = window.setTimeout(async () => {
+      if (json === lastSavedJson.current) return;
+      setErr(null);
+      setSyncing(true);
+      try {
+        await save(ADMIN_PASSKEY, c);
+        lastSavedJson.current = json;
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : "Auto-save failed");
+      } finally {
+        setSyncing(false);
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [c, save]);
 
   const handleSave = async () => {
     setErr(null);
     try {
       await save(ADMIN_PASSKEY, c);
+      lastSavedJson.current = JSON.stringify(c);
       onClose();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Save failed");
@@ -118,6 +166,24 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   };
 
   const upd = <K extends keyof Content>(key: K, value: Content[K]) => setC({ ...c, [key]: value });
+
+  const commit = async (next: Content, mediaUrlToDelete?: string) => {
+    setErr(null);
+    setC(next);
+    setSyncing(true);
+    try {
+      await save(ADMIN_PASSKEY, next);
+      lastSavedJson.current = JSON.stringify(next);
+      if (mediaUrlToDelete) {
+        await deleteMedia({ data: { passkey: ADMIN_PASSKEY, url: mediaUrlToDelete } });
+      }
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Sync failed");
+      throw e;
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-background/95 z-[100] overflow-auto">
@@ -131,7 +197,11 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={reset}
+              onClick={() => {
+                reset();
+                void commit(defaultContent);
+              }}
+              disabled={saving || syncing}
               className="label px-3 py-2 border border-line hover:border-accent"
             >
               RESET
@@ -144,14 +214,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || syncing}
               className="label px-3 py-2 bg-accent text-white border border-accent disabled:opacity-50"
             >
-              {saving ? "SAVING..." : "SAVE"}
+              {saving || syncing ? "SYNCING..." : "SAVE"}
             </button>
           </div>
         </div>
         {err && <div className="label text-accent mb-3">ERROR: {err}</div>}
+        {!err && syncing && <div className="label text-ink-dim mb-3">SYNCING TO BACKEND...</div>}
 
         <div className="flex gap-1 mb-4 border-b border-line">
           {(["header", "hero", "blog", "portfolio", "footer"] as const).map((t) => (
@@ -183,7 +254,8 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             <ImageField
               label="background image"
               value={c.hero.image}
-              onChange={(nv) => upd("hero", { ...c.hero, image: nv })}
+              onChange={(nv) => commit({ ...c, hero: { ...c.hero, image: nv } }, c.hero.image)}
+              onDelete={() => commit({ ...c, hero: { ...c.hero, image: "" } }, c.hero.image)}
             />
             {Object.entries(c.hero)
               .filter(([k]) => k !== "image")
@@ -211,12 +283,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                 <div className="flex justify-between items-center">
                   <span className="label">POST {i + 1}</span>
                   <button
-                    onClick={() =>
-                      upd(
-                        "blog",
-                        c.blog.filter((_, j) => j !== i),
-                      )
-                    }
+                    onClick={() => {
+                      const next = { ...c, blog: c.blog.filter((_, j) => j !== i) };
+                      void commit(next, post.image);
+                    }}
                     className="label text-accent"
                   >
                     DELETE
@@ -227,9 +297,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={post.image}
                     onChange={(nv) =>
-                      upd(
-                        "blog",
-                        c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      commit(
+                        { ...c, blog: c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)) },
+                        post.image,
+                      )
+                    }
+                    onDelete={() =>
+                      commit(
+                        { ...c, blog: c.blog.map((p, j) => (j === i ? { ...p, image: "" } : p)) },
+                        post.image,
                       )
                     }
                   />
@@ -302,8 +378,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
               </div>
             ))}
             <button
-              onClick={() =>
-                upd("blog", [
+              onClick={() => {
+                const next = {
+                  ...c,
+                  blog: [
                   ...c.blog,
                   {
                     id: String(Date.now()),
@@ -315,8 +393,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     title: "New post",
                     image: "",
                   },
-                ])
-              }
+                  ],
+                };
+                void commit(next);
+              }}
               className="label px-3 py-2 border border-line hover:border-accent"
             >
               + ADD POST
@@ -343,7 +423,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       onClick={() => {
                         const arr = [...c.portfolio];
                         [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
-                        upd("portfolio", arr);
+                        void commit({ ...c, portfolio: arr });
                       }}
                       className="label disabled:opacity-30"
                     >
@@ -354,19 +434,17 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                       onClick={() => {
                         const arr = [...c.portfolio];
                         [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]];
-                        upd("portfolio", arr);
+                        void commit({ ...c, portfolio: arr });
                       }}
                       className="label disabled:opacity-30"
                     >
                       ↓
                     </button>
                     <button
-                      onClick={() =>
-                        upd(
-                          "portfolio",
-                          c.portfolio.filter((_, j) => j !== i),
-                        )
-                      }
+                      onClick={() => {
+                        const next = { ...c, portfolio: c.portfolio.filter((_, j) => j !== i) };
+                        void commit(next, item.image);
+                      }}
                       className="label text-accent"
                     >
                       DELETE
@@ -378,9 +456,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={item.image}
                     onChange={(nv) =>
-                      upd(
-                        "portfolio",
-                        c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      commit(
+                        { ...c, portfolio: c.portfolio.map((p, j) => (j === i ? { ...p, image: nv } : p)) },
+                        item.image,
+                      )
+                    }
+                    onDelete={() =>
+                      commit(
+                        { ...c, portfolio: c.portfolio.map((p, j) => (j === i ? { ...p, image: "" } : p)) },
+                        item.image,
                       )
                     }
                   />
@@ -430,29 +514,33 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
               </div>
             ))}
             <button
-              onClick={() =>
-                upd("portfolio", [
-                  ...c.portfolio,
-                  {
-                    id: String(Date.now()),
-                    index: String(c.portfolio.length + 1).padStart(2, "0"),
-                    image: "",
-                    name: "NEW.APP",
-                    category: "CATEGORY",
-                    tag: "TAG",
-                    description: "",
-                    status: "LIVE\nACTIVE",
-                    deployedDate: "",
-                    deployedVersion: "",
-                    environment: "CLOUD",
-                    environmentLoc: "",
-                    role: "FOUNDER",
-                    roleType: "FULLSTACK",
-                    link: "",
-                    url: "",
-                  },
-                ])
-              }
+              onClick={() => {
+                const next = {
+                  ...c,
+                  portfolio: [
+                    ...c.portfolio,
+                    {
+                      id: String(Date.now()),
+                      index: String(c.portfolio.length + 1).padStart(2, "0"),
+                      image: "",
+                      name: "NEW.APP",
+                      category: "CATEGORY",
+                      tag: "TAG",
+                      description: "",
+                      status: "LIVE\nACTIVE",
+                      deployedDate: "",
+                      deployedVersion: "",
+                      environment: "CLOUD",
+                      environmentLoc: "",
+                      role: "FOUNDER",
+                      roleType: "FULLSTACK",
+                      link: "",
+                      url: "",
+                    },
+                  ],
+                };
+                void commit(next);
+              }}
               className="label px-3 py-2 border border-line hover:border-accent"
             >
               + ADD APP
