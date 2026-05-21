@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { ArrowUpRight, Github, Instagram, Linkedin, Twitter, Triangle, Mail, Globe, Building2, X } from "lucide-react";
 import { useContent, type BlogPost, type PortfolioItem } from "@/store/content";
 import { AdminTrigger } from "@/components/AdminPanel";
-import mqLogo from "@/assets/mq-logo.png";
+import MQLogo from "@/assets/mq-logo.png";
+import HermesAgentSection from "@/components/HermesAgentSection";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -491,6 +492,7 @@ function Index() {
       <Hero />
       <Blog />
       <Portfolio />
+      <HermesAgentSection />
       <Footer />
       <AdminTrigger />
     </main>

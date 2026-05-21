@@ -82,6 +82,21 @@ export type Content = {
   portfolioSub2: string;
   portfolioSub3: string;
   portfolio: PortfolioItem[];
+  hermesAgent: {
+    title: string;
+    description: string;
+    currentStage: string;
+    progress: number;
+    nextMilestone: string;
+    interfacePreview: string;
+    userFlowDiagram: string;
+    layoutPrototype: string;
+    tasks: {
+      id: string;
+      description: string;
+      status: 'todo' | 'in-progress' | 'done';
+    }[];
+  };
   footer: {
     brand: string;
     tagline: string;
@@ -182,6 +197,23 @@ const defaults: Content = {
     { id: "5", index: "05", image: p5, name: "MERQATO.MENU", category: "DIGITAL MENU SYSTEM", tag: "BUSINESS TOOL", description: "Modern digital menu for restaurants and resorts. Beautiful, fast and mobile-first.", status: "LIVE\nACTIVE", deployedDate: "2026.04.02", deployedVersion: "V01.2", environment: "CLOUD", environmentLoc: "GLOBAL", role: "FOUNDER", roleType: "FULLSTACK", link: "merqato.menu", url: "https://merqato.menu" },
     { id: "6", index: "06", image: p6, name: "MERQATO.STAY", category: "DIRECT BOOKING ENGINE", tag: "BOOKING PLATFORM", description: "Increase direct bookings with a fast, secure and commission-free booking system.", status: "LIVE\nACTIVE", deployedDate: "2026.04.12", deployedVersion: "V01.0", environment: "CLOUD", environmentLoc: "PALAWAN", role: "FOUNDER", roleType: "FULLSTACK", link: "merqato.stay", url: "https://merqato.stay" },
   ],
+  hermesAgent: {
+    title: "HERMES AGENT WORKING AREA",
+    description: "Development zone for Hermes Agent interfaces, user flows, and experimental webapps.",
+    currentStage: "INTERFACE DESIGN & PROTOTYPING",
+    progress: 35,
+    nextMilestone: "LIVE WORKING DEMO",
+    interfacePreview: "/assets/hermes-interface.jpg",
+    userFlowDiagram: "/assets/hermes-flow.jpg",
+    layoutPrototype: "/assets/hermes-layout.jpg",
+    tasks: [
+      { id: "t1", description: "Define core interface components", status: "done" },
+      { id: "t2", description: "Map primary user flows", status: "in-progress" },
+      { id: "t3", description: "Build working prototype", status: "todo" },
+      { id: "t4", description: "Integrate with live agent", status: "todo" },
+      { id: "t5", description: "Deploy demo environment", status: "todo" },
+    ],
+  },
   footer: {
     brand: "MERQATO.DIGITAL",
     tagline: "TROPICAL DIGITAL INFRASTRUCTURE",
