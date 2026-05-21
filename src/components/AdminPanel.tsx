@@ -195,7 +195,11 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={reset}
+              onClick={() => {
+                reset();
+                void commit(content);
+              }}
+              disabled={saving || syncing}
               className="label px-3 py-2 border border-line hover:border-accent"
             >
               RESET
@@ -208,14 +212,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || syncing}
               className="label px-3 py-2 bg-accent text-white border border-accent disabled:opacity-50"
             >
-              {saving ? "SAVING..." : "SAVE"}
+              {saving || syncing ? "SYNCING..." : "SAVE"}
             </button>
           </div>
         </div>
         {err && <div className="label text-accent mb-3">ERROR: {err}</div>}
+        {!err && syncing && <div className="label text-ink-dim mb-3">SYNCING TO BACKEND...</div>}
 
         <div className="flex gap-1 mb-4 border-b border-line">
           {(["header", "hero", "blog", "portfolio", "footer"] as const).map((t) => (
@@ -247,7 +252,8 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             <ImageField
               label="background image"
               value={c.hero.image}
-              onChange={(nv) => upd("hero", { ...c.hero, image: nv })}
+              onChange={(nv) => commit({ ...c, hero: { ...c.hero, image: nv } }, c.hero.image)}
+              onDelete={() => commit({ ...c, hero: { ...c.hero, image: "" } }, c.hero.image)}
             />
             {Object.entries(c.hero)
               .filter(([k]) => k !== "image")
