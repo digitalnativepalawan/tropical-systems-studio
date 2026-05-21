@@ -130,14 +130,16 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   const lastSavedJson = useRef(JSON.stringify(content));
 
   useEffect(() => {
-    lastSavedJson.current = JSON.stringify(content);
-    setC(content);
+    const incomingJson = JSON.stringify(content);
+    setC((current) => (JSON.stringify(current) === lastSavedJson.current ? content : current));
+    lastSavedJson.current = incomingJson;
   }, [content]);
 
   useEffect(() => {
     const json = JSON.stringify(c);
     if (json === lastSavedJson.current) return;
     const timer = window.setTimeout(async () => {
+      if (json === lastSavedJson.current) return;
       setErr(null);
       setSyncing(true);
       try {
