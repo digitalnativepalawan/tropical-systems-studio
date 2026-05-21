@@ -12,4 +12,9 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    resolve: {
+      noExternal: ["h3-v2", "h3", "rou3", "srvx"],
+    },
+  },
 });
