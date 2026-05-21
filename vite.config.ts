@@ -6,6 +6,18 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+const serverNoExternal = [
+  "h3-v2",
+  "rou3",
+  "srvx",
+  "seroval",
+  "seroval-plugins",
+  "cookie-es",
+  "@tanstack/history",
+  /^@tanstack\//,
+  "@supabase/supabase-js",
+];
+
 // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
 // @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
 export default defineConfig({
@@ -13,15 +25,11 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    resolve: {
+      noExternal: serverNoExternal,
+    },
     ssr: {
-      noExternal: [
-        "h3-v2",
-        "h3",
-        "rou3",
-        "srvx",
-        /^@tanstack\//,
-        "@supabase/supabase-js",
-      ],
+      noExternal: serverNoExternal,
     },
   },
 });
