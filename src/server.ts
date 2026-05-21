@@ -25,7 +25,7 @@ export default {
   async fetch(request: Request) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request);
+      const response = await handler.default.fetch(request);
       return response;
     } catch (error) {
       console.error(consumeLastCapturedError() ?? error);
