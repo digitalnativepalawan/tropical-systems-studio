@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
 import { useContent, type Content } from "@/store/content";
-import { uploadMedia } from "@/lib/content.functions";
+import { deleteMedia, uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
 
@@ -58,10 +58,12 @@ function ImageField({
   label,
   value,
   onChange,
+  onDelete,
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (v: string) => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
   return (
@@ -80,7 +82,7 @@ function ImageField({
             setBusy(true);
             try {
               const url = await uploadFile(f);
-              onChange(url);
+              await onChange(url);
             } catch (err) {
               alert("Upload failed: " + (err instanceof Error ? err.message : "unknown"));
             } finally {
@@ -93,6 +95,26 @@ function ImageField({
           }}
           className="text-[10px] text-ink-dim"
         />
+        {value && onDelete && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              if (!window.confirm("Delete this image from storage and remove it from the site?")) return;
+              setBusy(true);
+              try {
+                await onDelete();
+              } catch (err) {
+                alert("Delete failed: " + (err instanceof Error ? err.message : "unknown"));
+              } finally {
+                setBusy(false);
+              }
+            }}
+            className="label border border-line px-2 py-1 text-accent hover:border-accent disabled:opacity-50"
+          >
+            DELETE IMAGE
+          </button>
+        )}
         {busy && <span className="label text-ink-dim">SYNCING...</span>}
       </div>
     </label>
