@@ -13,8 +13,15 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    resolve: {
-      noExternal: ["h3-v2", "h3", "rou3", "srvx"],
+    ssr: {
+      noExternal: [
+        "h3-v2",
+        "h3",
+        "rou3",
+        "srvx",
+        /^@tanstack\//,
+        "@supabase/supabase-js",
+      ],
     },
   },
 });
