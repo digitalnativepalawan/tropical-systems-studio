@@ -126,13 +126,37 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   const [c, setC] = useState<Content>(content);
   const [tab, setTab] = useState<"header" | "hero" | "blog" | "portfolio" | "footer">("header");
   const [err, setErr] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const lastSavedJson = useRef(JSON.stringify(content));
 
-  useEffect(() => setC(content), [content]);
+  useEffect(() => {
+    lastSavedJson.current = JSON.stringify(content);
+    setC(content);
+  }, [content]);
+
+  useEffect(() => {
+    const json = JSON.stringify(c);
+    if (json === lastSavedJson.current) return;
+    const timer = window.setTimeout(async () => {
+      setErr(null);
+      setSyncing(true);
+      try {
+        await save(ADMIN_PASSKEY, c);
+        lastSavedJson.current = json;
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : "Auto-save failed");
+      } finally {
+        setSyncing(false);
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [c, save]);
 
   const handleSave = async () => {
     setErr(null);
     try {
       await save(ADMIN_PASSKEY, c);
+      lastSavedJson.current = JSON.stringify(c);
       onClose();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Save failed");
@@ -140,6 +164,24 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   };
 
   const upd = <K extends keyof Content>(key: K, value: Content[K]) => setC({ ...c, [key]: value });
+
+  const commit = async (next: Content, mediaUrlToDelete?: string) => {
+    setErr(null);
+    setC(next);
+    setSyncing(true);
+    try {
+      await save(ADMIN_PASSKEY, next);
+      lastSavedJson.current = JSON.stringify(next);
+      if (mediaUrlToDelete) {
+        await deleteMedia({ data: { passkey: ADMIN_PASSKEY, url: mediaUrlToDelete } });
+      }
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Sync failed");
+      throw e;
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-background/95 z-[100] overflow-auto">
