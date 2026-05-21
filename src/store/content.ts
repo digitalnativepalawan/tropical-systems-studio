@@ -223,7 +223,23 @@ export const useContent = create<Store>()((set, get) => ({
       const res = await loadSiteContent();
       if (res.json) {
         const parsed = JSON.parse(res.json) as Content;
-        set({ content: { ...defaults, ...parsed }, loaded: true });
+        const merged = { ...defaults, ...parsed } as Content;
+        // Self-heal stale bundled asset paths (e.g. /assets/hero-<oldhash>.jpg)
+        // from previous builds by falling back to current bundled defaults.
+        const isStale = (u?: string) => typeof u === "string" && u.startsWith("/assets/");
+        const heroImage = isStale(merged.hero?.image) ? defaults.hero.image : merged.hero.image;
+        const blog = (merged.blog ?? []).map((p) => {
+          const d = defaults.blog.find((x) => x.id === p.id);
+          return { ...p, image: isStale(p.image) && d ? d.image : p.image };
+        });
+        const portfolio = (merged.portfolio ?? []).map((p) => {
+          const d = defaults.portfolio.find((x) => x.id === p.id);
+          return { ...p, image: isStale(p.image) && d ? d.image : p.image };
+        });
+        set({
+          content: { ...merged, hero: { ...merged.hero, image: heroImage }, blog, portfolio },
+          loaded: true,
+        });
       } else {
         set({ loaded: true });
       }
