@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LockKeyhole, X } from "lucide-react";
-import { useContent, type Content } from "@/store/content";
+import { defaultContent, useContent, type Content } from "@/store/content";
 import { deleteMedia, uploadMedia } from "@/lib/content.functions";
 
 const ADMIN_PASSKEY = "5309";
@@ -197,7 +197,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
             <button
               onClick={() => {
                 reset();
-                void commit(content);
+                void commit(defaultContent);
               }}
               disabled={saving || syncing}
               className="label px-3 py-2 border border-line hover:border-accent"
