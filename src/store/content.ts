@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { loadSiteContent, saveSiteContent } from "@/lib/content.functions";
 import hero from "@/assets/hero.jpg";
 import b1 from "@/assets/blog-1.jpg";
 import b2 from "@/assets/blog-2.jpg";
@@ -251,11 +252,26 @@ export const useContent = create<Store>()((set, get) => ({
   load: async () => {
     if (get().loaded) return;
     try {
-      const { loadSiteContent } = await import("@/lib/content.functions");
       const res = await loadSiteContent();
       if (res.json) {
         const parsed = JSON.parse(res.json) as Content;
-        set({ content: { ...defaults, ...parsed }, loaded: true });
+        const merged = { ...defaults, ...parsed } as Content;
+        // Self-heal stale bundled asset paths (e.g. /assets/hero-<oldhash>.jpg)
+        // from previous builds by falling back to current bundled defaults.
+        const isStale = (u?: string) => typeof u === "string" && u.startsWith("/assets/");
+        const heroImage = isStale(merged.hero?.image) ? defaults.hero.image : merged.hero.image;
+        const blog = (merged.blog ?? []).map((p) => {
+          const d = defaults.blog.find((x) => x.id === p.id);
+          return { ...p, image: isStale(p.image) && d ? d.image : p.image };
+        });
+        const portfolio = (merged.portfolio ?? []).map((p) => {
+          const d = defaults.portfolio.find((x) => x.id === p.id);
+          return { ...p, image: isStale(p.image) && d ? d.image : p.image };
+        });
+        set({
+          content: { ...merged, hero: { ...merged.hero, image: heroImage }, blog, portfolio },
+          loaded: true,
+        });
       } else {
         set({ loaded: true });
       }
@@ -267,7 +283,6 @@ export const useContent = create<Store>()((set, get) => ({
   save: async (passkey, c) => {
     set({ saving: true });
     try {
-      const { saveSiteContent } = await import("@/lib/content.functions");
       await saveSiteContent({ data: { passkey, json: JSON.stringify(c) } });
       set({ content: c });
     } finally {
