@@ -55,3 +55,25 @@ export const uploadMedia = createServerFn({ method: "POST" })
     const { data: pub } = supabaseAdmin.storage.from("media").getPublicUrl(path);
     return { url: pub.publicUrl };
   });
+
+export const deleteMedia = createServerFn({ method: "POST" })
+  .inputValidator((input: { passkey: string; url: string }) => {
+    if (!input || typeof input.passkey !== "string" || typeof input.url !== "string") {
+      throw new Error("Invalid input");
+    }
+    return input;
+  })
+  .handler(async ({ data }) => {
+    if (data.passkey !== ADMIN_PASSKEY) throw new Error("Unauthorized");
+
+    const marker = "/storage/v1/object/public/media/";
+    const markerIndex = data.url.indexOf(marker);
+    if (markerIndex === -1) return { ok: true, deleted: false };
+
+    const path = decodeURIComponent(data.url.slice(markerIndex + marker.length).split("?")[0]);
+    if (!path || path.includes("..")) throw new Error("Invalid media path");
+
+    const { error } = await supabaseAdmin.storage.from("media").remove([path]);
+    if (error) throw new Error(error.message);
+    return { ok: true, deleted: true };
+  });
