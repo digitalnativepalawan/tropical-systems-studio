@@ -281,12 +281,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                 <div className="flex justify-between items-center">
                   <span className="label">POST {i + 1}</span>
                   <button
-                    onClick={() =>
-                      upd(
-                        "blog",
-                        c.blog.filter((_, j) => j !== i),
-                      )
-                    }
+                    onClick={() => {
+                      const next = { ...c, blog: c.blog.filter((_, j) => j !== i) };
+                      void commit(next, post.image);
+                    }}
                     className="label text-accent"
                   >
                     DELETE
@@ -297,9 +295,15 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     label="image"
                     value={post.image}
                     onChange={(nv) =>
-                      upd(
-                        "blog",
-                        c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)),
+                      commit(
+                        { ...c, blog: c.blog.map((p, j) => (j === i ? { ...p, image: nv } : p)) },
+                        post.image,
+                      )
+                    }
+                    onDelete={() =>
+                      commit(
+                        { ...c, blog: c.blog.map((p, j) => (j === i ? { ...p, image: "" } : p)) },
+                        post.image,
                       )
                     }
                   />
@@ -372,8 +376,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
               </div>
             ))}
             <button
-              onClick={() =>
-                upd("blog", [
+              onClick={() => {
+                const next = {
+                  ...c,
+                  blog: [
                   ...c.blog,
                   {
                     id: String(Date.now()),
@@ -385,8 +391,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
                     title: "New post",
                     image: "",
                   },
-                ])
-              }
+                  ],
+                };
+                void commit(next);
+              }}
               className="label px-3 py-2 border border-line hover:border-accent"
             >
               + ADD POST
