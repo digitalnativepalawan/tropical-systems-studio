@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { loadSiteContent, saveSiteContent } from "@/lib/content.functions";
 import hero from "@/assets/hero.jpg";
 import b1 from "@/assets/blog-1.jpg";
 import b2 from "@/assets/blog-2.jpg";
@@ -219,7 +220,6 @@ export const useContent = create<Store>()((set, get) => ({
   load: async () => {
     if (get().loaded) return;
     try {
-      const { loadSiteContent } = await import("@/lib/content.functions");
       const res = await loadSiteContent();
       if (res.json) {
         const parsed = JSON.parse(res.json) as Content;
@@ -235,7 +235,6 @@ export const useContent = create<Store>()((set, get) => ({
   save: async (passkey, c) => {
     set({ saving: true });
     try {
-      const { saveSiteContent } = await import("@/lib/content.functions");
       await saveSiteContent({ data: { passkey, json: JSON.stringify(c) } });
       set({ content: c });
     } finally {
