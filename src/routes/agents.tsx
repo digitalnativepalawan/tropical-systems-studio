@@ -86,12 +86,12 @@ function AgentsHero() {
               — YOUR 24/7 AI EMPLOYEE —
             </div>
             <h1 className="font-serif text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-ink leading-[0.95] max-w-4xl">
-              Meet Your Palawan<br />
+              Your Palawan<br />
               AI Operator
             </h1>
             <p className="mt-4 md:mt-6 max-w-2xl text-ink-dim text-[11px] md:text-[13px] leading-relaxed font-light">
-              An always-on intelligent assistant that helps micro-resorts in Palawan handle
-              bookings, orders, guest messages, and operations — 24 hours a day.
+              An always-on intelligent assistant that handles bookings, guest
+              messages, and resort operations — so you can focus on hospitality, not software.
             </p>
 
             {/* tagline pills */}
@@ -505,6 +505,80 @@ const reasons = [
   { icon: TrendingUp, title: "Helps you compete with bigger resorts", desc: "Professional digital presence and 24/7 service at a fraction of the cost." },
 ];
 
+// ────── FAQ ──────
+
+const faqs = [
+  {
+    q: "Do I need technical skills to use this?",
+    a: "No. The AI Operator handles everything — from building your website to managing guest messages. You just tell it what you need in plain English.",
+  },
+  {
+    q: "What platforms does it work on?",
+    a: "WhatsApp, Facebook Messenger, your website chat, and email. Guests reach you on their preferred channel and the AI responds instantly.",
+  },
+  {
+    q: "Can I customize the AI's responses?",
+    a: "Yes. During setup we train the AI on your property's specific info — room types, rates, policies, local recommendations — so responses sound like you.",
+  },
+  {
+    q: "What if the internet goes down?",
+    a: "The system is designed for Palawan's connectivity. It queues messages when offline and syncs automatically when back online. Guests never see a gap.",
+  },
+  {
+    q: "How quickly can I get started?",
+    a: "Most properties are live within 48 hours. We handle the setup — you just review and approve.",
+  },
+  {
+    q: "Is my data secure?",
+    a: "All data is encrypted and stored securely. You own your data. We never share guest information with third parties.",
+  },
+];
+
+function FaqSection() {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+
+  return (
+    <section className="px-6 lg:px-10 pt-16 md:pt-20">
+      <div className="border-t border-line pt-6 mb-8">
+        <div className="label text-accent mb-2">/ FAQ</div>
+        <h2 className="font-serif text-2xl md:text-4xl text-ink">
+          Common Questions
+        </h2>
+      </div>
+
+      <div className="border border-line">
+        {faqs.map((faq, i) => (
+          <div key={i} className="border-b border-line last:border-b-0">
+            <button
+              type="button"
+              onClick={() => setOpenIdx(openIdx === i ? null : i)}
+              className="w-full flex items-center justify-between px-4 py-4 text-left hover:bg-surface/30 transition-colors"
+            >
+              <span className="text-[11px] uppercase tracking-[0.1em] text-ink pr-4">
+                {faq.q}
+              </span>
+              <ChevronRight
+                className={`w-4 h-4 text-accent shrink-0 transition-transform duration-200 ${
+                  openIdx === i ? "rotate-90" : ""
+                }`}
+              />
+            </button>
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                openIdx === i ? "max-h-40" : "max-h-0"
+              }`}
+            >
+              <div className="px-4 pb-4 text-[11px] text-ink-dim leading-relaxed">
+                {faq.a}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function WhySection() {
   return (
     <section className="px-6 lg:px-10 pt-16 md:pt-20">
@@ -626,6 +700,7 @@ function AgentsPage() {
       <DemoChat />
       <Pricing />
       <WhySection />
+      <FaqSection />
       <FinalCta />
       <AgentsFooter />
     </main>
