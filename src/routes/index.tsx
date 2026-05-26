@@ -34,6 +34,7 @@ function Header() {
       <div className="hidden md:flex col-span-6 md:col-span-4 items-start justify-center gap-6">
         <span className="text-ink border-b border-ink">HOME</span>
         <Link to="/agents" className="text-ink-dim hover:text-accent transition-colors">OPERATORS</Link>
+        <Link to="/workspace" className="text-ink-dim hover:text-accent transition-colors">WORKSPACE</Link>
       </div>
       <div className="col-span-6 md:col-span-3 md:text-right">
         <div className="text-ink flex md:justify-end items-center gap-1.5">{h.rightLine1}<Dot /></div>
@@ -480,6 +481,7 @@ function Footer() {
       <div className="flex gap-4 mt-3 text-[10px] uppercase tracking-[0.14em]">
         <span className="text-ink">HOME</span>
         <Link to="/agents" className="text-ink-dim hover:text-accent transition-colors">OPERATORS</Link>
+        <Link to="/workspace" className="text-ink-dim hover:text-accent transition-colors">WORKSPACE</Link>
       </div>
     </footer>
   );

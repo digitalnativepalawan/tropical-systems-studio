@@ -48,6 +48,7 @@ function AgentsHeader() {
         <div className="col-span-6 md:col-span-4 flex justify-end md:justify-center items-start gap-4 md:gap-6">
           <Link to="/" className="text-ink-dim hover:text-accent transition-colors">HOME</Link>
           <span className="text-accent border-b border-accent">OPERATORS</span>
+          <Link to="/workspace" className="text-ink-dim hover:text-accent transition-colors">WORKSPACE</Link>
         </div>
         <div className="hidden md:flex col-span-4 justify-end">
           <MQLogo className="w-12 h-auto" />

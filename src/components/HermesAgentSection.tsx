@@ -382,19 +382,27 @@ export default function HermesAgentSection() {
             <Bot className="w-5 h-5 text-accent shrink-0" />
             <div>
               <div className="text-ink text-[11px] uppercase tracking-[0.12em]">
-                Want your own AI Operator?
+                Enter the Workspace
               </div>
               <div className="text-ink-dim text-[10px]">
-                Visit the Operators page for full demo, pricing, and setup.
+                Chat with Hermes directly, see capabilities, and watch live activity.
               </div>
             </div>
           </div>
-          <a
-            href="/agents"
-            className="label flex items-center gap-2 px-4 py-2 border border-accent bg-accent/10 text-accent hover:bg-accent hover:text-background transition-all shrink-0"
-          >
-            GO TO OPERATORS <ChevronRight className="w-3.5 h-3.5" />
-          </a>
+          <div className="flex gap-2 shrink-0">
+            <a
+              href="/workspace"
+              className="label flex items-center gap-2 px-4 py-2 border border-accent bg-accent/10 text-accent hover:bg-accent hover:text-background transition-all"
+            >
+              ENTER WORKSPACE <ChevronRight className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="/agents"
+              className="label flex items-center gap-2 px-4 py-2 border border-line text-ink-dim hover:border-accent hover:text-accent transition-all"
+            >
+              AI OPERATORS <ArrowUpRight className="w-3 h-3" />
+            </a>
+          </div>
         </div>
       </div>
     </section>
